@@ -1,0 +1,1 @@
+import{_ as e,o as n,c as a}from"./index-463e6ccc.js";const r=e({},[["render",function(e,r){return n(),a("div",null,"form-management")}],["__file","F:/state-controlled-high-speed-railway/src/views/form-management/index.vue"]]);export{r as default};

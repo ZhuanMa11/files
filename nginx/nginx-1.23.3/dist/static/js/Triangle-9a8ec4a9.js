@@ -1,0 +1,1 @@
+import{_ as o,r as e,o as s,a as n}from"./index-41939549.js";const r=o({},[["render",function(o,r){const a=e("SvgIcon");return s(),n(a,{iconClass:"Triangle",style:{color:"#969696"}})}],["__file","E:/state-controlled-high-speed-railway/src/icons/el-com-icon/Triangle.vue"]]);export{r as T};

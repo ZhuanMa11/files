@@ -1,0 +1,1 @@
+import{C as e}from"./index-00c8356a.js";function n(n,t){return e.AES.encrypt(t,e.enc.Utf8.parse(n),{mode:e.mode.ECB,padding:e.pad.Pkcs7}).toString()}function t(n,t){return e.AES.decrypt(t,e.enc.Utf8.parse(n),{mode:e.mode.ECB,padding:e.pad.Pkcs7}).toString(e.enc.Utf8)}export{t as a,n as c};

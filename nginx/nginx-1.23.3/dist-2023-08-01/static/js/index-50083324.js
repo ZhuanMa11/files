@@ -1,0 +1,1 @@
+import{_ as e,o as a,c as o}from"./index-06ae3e41.js";const s={class:"operation-log"};const t=e({},[["render",function(e,t){return a(),o("div",s)}],["__scopeId","data-v-02adca92"],["__file","E:/state-controlled-high-speed-railway/src/views/operation-log/index.vue"]]);export{t as default};

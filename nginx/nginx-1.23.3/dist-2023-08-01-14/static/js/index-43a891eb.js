@@ -1,0 +1,1 @@
+import{_ as e,o as n,c as a}from"./index-60b5ea1a.js";const r=e({},[["render",function(e,r){return n(),a("div",null,"workbench")}],["__file","E:/state-controlled-high-speed-railway/src/views-management/workbench/index.vue"]]);export{r as default};

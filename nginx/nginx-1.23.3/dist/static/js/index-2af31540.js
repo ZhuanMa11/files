@@ -1,0 +1,1 @@
+import{_ as e,o as s,c as n}from"./index-41939549.js";const a=e({},[["render",function(e,a){return s(),n("div",null,"process-management")}],["__file","E:/state-controlled-high-speed-railway/src/views/process-management/index.vue"]]);export{a as default};
