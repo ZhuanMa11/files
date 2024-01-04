@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dtcloud>
+    <data>
+        <menuitem id="menu_timed_task_management" name="定时任务" sequence="100" groups="base.group_erp_manager"/>
+    </data>
+</dtcloud>

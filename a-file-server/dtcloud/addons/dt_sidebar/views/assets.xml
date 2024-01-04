@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dtcloud>
+    <data>
+        <template id="assets_backend" name="DTCloud Theme" inherit_id="web.assets_backend">
+            <xpath expr=".">
+                <link rel="stylesheet" href="/dt_sidebar/static/src/scss/sidebar.scss"/>
+                <script type="application/javascript" src="/dt_sidebar/static/src/js/sidebar.js"/>
+            </xpath>
+        </template>
+    </data>
+</dtcloud>
