@@ -1,0 +1,48 @@
+# Translation of DTCloud Server.
+# This file contains the translation of the following modules:
+# 	* auth_totp_portal
+
+
+#. module: auth_totp_portal
+#: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
+msgid "(Disable two-factor authentication)"
+msgstr "（禁用双重身份验证）"
+
+#. module: auth_totp_portal
+#: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
+msgid ""
+"<i class=\"fa fa-warning\"/>\n"
+"                        Two-factor authentication not enabled"
+msgstr ""
+"<i class=\"fa fa-warning\"/>\n"
+"                        未启用双重身份验证"
+
+#. module: auth_totp_portal
+#: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
+msgid ""
+"<span class=\"text-success\">\n"
+"                        <i class=\"fa fa-check-circle\"/>\n"
+"                        Two-factor authentication enabled\n"
+"                    </span>"
+msgstr ""
+"<span class=\"text-success\">\n"
+"                        <i class=\"fa fa-check-circle\"/>\n"
+"                        启用双重身份验证\n"
+"                    </span>"
+
+#. module: auth_totp_portal
+#: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
+msgid "Enable two-factor authentication"
+msgstr "启用双重身份验证"
+
+#. module: auth_totp_portal
+#. openerp-web
+#: code:addons/auth_totp_portal/static/src/js/totp_frontend.js:0
+#, python-format
+msgid "Operation failed for unknown reason."
+msgstr "由于未知原因，操作失败。"
+
+#. module: auth_totp_portal
+#: model_terms:ir.ui.view,arch_db:auth_totp_portal.totp_portal_hook
+msgid "Two-factor authentication"
+msgstr "双重身份验证"

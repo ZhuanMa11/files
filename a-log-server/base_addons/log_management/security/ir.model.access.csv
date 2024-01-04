@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+csv_access_LoginLog_user,LoginLog,model_login_log,base.group_user,1,1,1,1
+csv_access_OperationLog_user,OperationLog,model_operation_log,base.group_user,1,1,1,1
+csv_access_ErrorLog_user,ErrorLog,model_error_log,base.group_user,1,1,1,1

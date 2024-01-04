@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dtcloud>
+    <data>
+        <menuitem id="log_management_menu" name="日志管理" sequence="100" groups="base.group_erp_manager"/>
+    </data>
+</dtcloud>

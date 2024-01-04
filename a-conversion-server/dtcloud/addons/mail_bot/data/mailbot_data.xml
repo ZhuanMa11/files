@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dtcloud>
+    <data>
+        <record id="base.user_root" model="res.users">
+            <field name="dtcloudbot_state">disabled</field>
+        </record>
+    </data>
+</dtcloud>

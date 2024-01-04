@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dtcloud noupdate="1">
+    <data>
+        <record model="message.management" id="data_message_management_1">
+            <field name="flag">success</field>
+            <field name="name">登录成功</field>
+        </record>
+        <record model="message.management" id="data_message_management_2">
+            <field name="flag">error</field>
+            <field name="name">token过期</field>
+            <field name="next_operation">exit</field>
+        </record>
+        <record model="message.management" id="data_message_management_3">
+            <field name="flag">error</field>
+            <field name="name">用户不存在或用户已被管理员删除</field>
+            <field name="next_operation">exit</field>
+        </record>
+        <record model="message.management" id="data_message_management_4">
+            <field name="flag">error</field>
+            <field name="name">密码和账号不匹配</field>
+        </record>
+        <record model="message.management" id="data_message_management_5">
+            <field name="flag">success</field>
+            <field name="name">%s操作成功</field>
+        </record>
+        <record model="message.management" id="data_message_management_6">
+            <field name="flag">error</field>
+            <field name="name">%s操作失败</field>
+        </record>
+        <record model="message.management" id="data_message_management_7">
+            <field name="flag">error</field>
+            <field name="name">程序执行错误</field>
+        </record>
+        <record model="message.management" id="data_message_management_8">
+            <field name="flag">error</field>
+            <field name="name">记录不存在</field>
+        </record>
+        <record model="message.management" id="data_message_management_9">
+            <field name="flag">success</field>
+            <field name="name">可以预览</field>
+        </record>
+        <record model="message.management" id="data_message_management_10">
+            <field name="flag">error</field>
+            <field name="name">不可以预览</field>
+        </record>
+
+    </data>
+</dtcloud>

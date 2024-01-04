@@ -1,0 +1,18 @@
+# Translation of DTCloud Server.
+# This file contains the translation of the following modules:
+# 	* web_kanban_gauge
+
+
+#. module: web_kanban_gauge
+#. openerp-web
+#: code:addons/web_kanban_gauge/static/src/js/kanban_gauge.js:99
+#, python-format
+msgid "Max: "
+msgstr "最大值："
+
+#. module: web_kanban_gauge
+#. openerp-web
+#: code:addons/web_kanban_gauge/static/src/js/kanban_gauge.js:97
+#, python-format
+msgid "Value: "
+msgstr "价值："

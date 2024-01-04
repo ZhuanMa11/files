@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dtcloud>
+    <data>
+        <record id="form_for_conversion_record" model="ir.ui.view">
+            <field name="name">conversion.record.form</field>
+            <field name="model">conversion.record</field>
+            <field name="arch" type="xml">
+
+                <form string="表单">
+                    <button name="automatically_converts_unconverted_models" type="object" string="自动转换模型"/>
+                    <sheet>
+                        <group>
+                            <group>
+                    <field name="file_name"/>
+                    <field name="file_ext"/>
+                    <field name="file_in_dir"/>
+                    <field name="file_out_dir"/>
+                    <field name="middle_dir"/>
+                    <field name="visual_style"/>
+                    <field name="conversion_type"/>
+                    <field name="result"/>
+                    <field name="message"/>
+                            </group>
+                            <group>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="tree_for_conversion_record" model="ir.ui.view">
+            <field name="name">conversion.record.tree</field>
+            <field name="model">conversion.record</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <tree string="列表">
+                    <field name="file_name"/>
+                    <field name="file_ext"/>
+                    <field name="file_in_dir"/>
+                    <field name="file_out_dir"/>
+                    <field name="middle_dir"/>
+                    <field name="visual_style"/>
+                    <field name="conversion_type"/>
+                    <field name="result"/>
+                    <field name="message"/>
+
+
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_for_conversion_record" model="ir.actions.act_window">
+            <field name="name">转换记录</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">conversion.record</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    创建单据.
+                </p>
+                <p>
+                </p>
+            </field>
+        </record>
+        <menuitem id="menu_for_conversion_record" action="action_for_conversion_record"/>
+    </data>
+</dtcloud>

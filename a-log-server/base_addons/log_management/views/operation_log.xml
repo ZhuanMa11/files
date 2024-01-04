@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dtcloud>
+    <data>
+        <record id="form_for_operation_log" model="ir.ui.view">
+            <field name="name">operation.log.form</field>
+            <field name="model">operation.log</field>
+            <field name="arch" type="xml">
+                <form string="表单">
+                    <sheet>
+                            <group>
+                                <field name="create_uid"/>
+                                <field name="create_date"/>
+                                <field name="name"/>
+                                <field name="operation_type"/>
+                                <field name="operator"/>
+                                <field name="operation_start_time"/>
+                                <field name="operation_end_time"/>
+                                <field name="request_ip"/>
+                                <field name="request_mode"/>
+                                <field name="request_route"/>
+                                <field name="request"/>
+                                <field name="response"/>
+
+
+                            </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="tree_for_operation_log" model="ir.ui.view">
+            <field name="name">operation.log.tree</field>
+            <field name="model">operation.log</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <tree string="列表">
+                    <field name="create_uid"/>
+                    <field name="create_date"/>
+                    <field name="name"/>
+                    <field name="operation_object"/>
+                    <field name="operation_type"/>
+                    <field name="operator"/>
+                    <field name="operation_start_time"/>
+                    <field name="operation_end_time"/>
+                    <field name="request_ip"/>
+                    <field name="request_mode"/>
+                    <field name="request_route"/>
+                    <field name="request"/>
+                    <field name="response"/>
+
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_for_operation_log" model="ir.actions.act_window">
+            <field name="name">操作日志</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">operation.log</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    创建单据.
+                </p>
+                <p>
+                </p>
+            </field>
+        </record>
+        <menuitem id="menu_for_operation_log" action="action_for_operation_log" parent="log_management_menu"/>
+    </data>
+</dtcloud>

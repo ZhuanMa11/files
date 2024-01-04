@@ -1,0 +1,98 @@
+$dtcloud-sidebar-width: 200px;
+$gray-base: #2932e1;
+$gray-lighter: lighten($gray-base, 93.5%);
+
+.app-sidebar-panel {
+  width: $dtcloud-sidebar-width;
+  background-color: #CBD4ED;
+  height: 100% !important;
+  overflow-y: auto;
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.o_main_navbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+html .o_web_client > .o_action_manager {
+  direction: ltr;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+  flex: 1 1 auto;
+  height: calc(100% - 46px);
+  overflow: hidden;
+  margin-top: 46px;
+}
+
+html .o_web_client {
+  height: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  flex-flow: row;
+}
+
+.o_main {
+  margin-top: 46px;
+}
+
+.app-sidebar {
+  white-space: nowrap;
+  padding: 0;
+  .app-sidebar-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    > li {
+      display: block;
+      margin: 0;
+      padding: 0;
+      border: 0px;
+      > a {
+        display: block;
+        position: relative;
+        margin: 0;
+        border: 0px;
+        padding: 8px 15px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 400;
+        color: #222222;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      m {
+        display: block;
+      }
+      o {
+        position: relative;
+      }
+      s {
+        margin: 0;
+      }
+    }
+    > li:hover > a {
+      background: darken(#2932e1, 1%);
+      color: #FFFFFF;
+    }
+  }
+}
+
+.app-sidebar-menuitem {
+  width: 23px;
+  height: 22px;
+  margin-right: 5px;
+}
+
+.toggle-sidebar {
+  margin-left: 0px;
+}
+
+img.img.sidebar_company_logo {
+  height: 46px;
+  width: 200px;
+}
