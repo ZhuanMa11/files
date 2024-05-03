@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 # 函数初始化
 source ./util.sh
 
