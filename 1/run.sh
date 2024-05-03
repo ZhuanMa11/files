@@ -236,9 +236,9 @@ install_flink_cdc() {
     read -p "Datasource type to submit, choose one: [$(dirsInPath '*' $ROOTPATH/src|xargs |tr ' ' '|')]: " sourceType && \
         [ -d $ROOTPATH/src/$sourceType ] || { echo "source type $sourceType not found";exit 1; }
     read -p "Please type source project:
-        $(dirsInPath '*' $ROOTPATH/src/$sourceType|xargs -n 1)
+        $(dirsInPath '*' $ROOTPATH/src/$sourceType/projects|xargs -n 1)
     >>> Selected: " sourceProject && \
-        [ -d $ROOTPATH/src/$sourceType/$sourceProject ] || { echo "source project $sourceProject not found with type $sourceType ";exit 1; }
+        [ -d $ROOTPATH/src/$sourceType/projects/$sourceProject ] || { echo "source project $sourceProject not found with type $sourceType ";exit 1; }
     
     read -p "Please type starrocks project:
         $(dirsInPath '*' $ROOTPATH/dest/sr/projects|xargs -n 1)
