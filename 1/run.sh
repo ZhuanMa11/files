@@ -20,7 +20,7 @@ install_mysql() {
     mysql_root_password=$5
 
     # 创建一个 docker-compose.yml 文件来定义 MySQL 服务
-    [ -d $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml ] &&  \
+    [ -d $ROOTPATH/src/mysql/projects/${project_name} ] &&  \
         docker-compose -f $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml up -d && \
         { echo "MySQL [${project_name}] started successfully"; exit 0; }
 
@@ -68,15 +68,16 @@ EOF
 
 stop_mysql() {
     dirsInPath '*' $ROOTPATH/src/mysql/projects/
-    read -p "project_to_stop" name
-    if [ "a$name" == "a" ] || \
-        [ ! -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml ]; then
-        echo "invalid project name"
-        exit 1
-    fi
+    read -p "Select project to be stopped: " name
+    [ "a$name" == "a" ] && \
+        { echo "invalid project name"; exit 1; }
 
-    # 停止 MySQL 的具体步骤
+    [ ! -d $ROOTPATH/src/mysql/projects/$name ] && \
+        { echo "project $name not found"; exit 1; }
+    [ ! -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml ] && \
+         { echo "Mysql unable to stop,maybe external"; exit 0; }
     echo "Stopping MySQL [${project_name}] ..."
+    # 停止 MySQL 的具体步骤
     docker-compose -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml down && \
     echo "MySQL [${project_name}] stopped successfully"
 }
@@ -88,7 +89,7 @@ list_mysql() {
 
 status_mysql() {
     dirsInPath '*' $ROOTPATH/src/mysql/projects/
-    read -p "project_to_check" name
+    read -p "Select project to be checked: " name
     if [ "a$name" == "a" ] || \
         [ ! -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml ]; then
         echo "invalid project status"
@@ -180,8 +181,8 @@ docker-compose -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml 
 }
 
 stop_starrocks() {
-    find $ROOTPATH/dest/sr/projects/ -maxdepth 1 -type d  |grep -v '\/$'|xargs -i basename {}
-    read -p "project_to_stop" name
+    dirsInPath '*' $ROOTPATH/dest/sr/projects/
+    read -p "Select project to be stopped: " name
     if [ "a$name" == "a" ] || \
         [ ! -f $ROOTPATH/dest/sr/projects/$name/docker-compose.yml ]; then
         echo "invalid project name"
@@ -190,8 +191,7 @@ stop_starrocks() {
     # 停止 Starrocks 的具体步骤
     echo "Stopping Starrocks [${project_name}] ..."
     docker-compose -f $ROOTPATH/dest/sr/projects/$name/docker-compose.yml down && \
-    # your stopation commands here
-    echo "Starrocks [${project_name}] stopped successfully"
+        echo "Starrocks [${project_name}] stopped successfully"
 }
 
 list_starrocks() {
@@ -199,9 +199,9 @@ list_starrocks() {
     dirsInPath '*' $ROOTPATH/dest/sr/projects/
 }
 
-status_mysql() {
+status_starrocks() {
     dirsInPath '*' $ROOTPATH/dest/sr/projects/
-    read -p "project_to_check" name
+    read -p "Select project to be checked: " name
     if [ "a$name" == "a" ] || \
         [ ! -f $ROOTPATH/dest/sr/projects/$name/docker-compose.yml ]; then
         echo "invalid project status"
@@ -284,7 +284,7 @@ list_flink_cdc() {
 
 status_flink_cdc() {
     dirsInPath '*' $ROOTPATH/flink/projects/
-    read -p "project_to_check" name
+    read -p "Select project to be checked: " name
     if [ "a$name" == "a" ] || \
         [ ! -f $ROOTPATH/flink/projects/$name/docker-compose.yml ]; then
         echo "invalid project status"
