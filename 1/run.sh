@@ -33,7 +33,7 @@ install_mysql() {
     cp -a $ROOTPATH/src/mysql/initsql/* $ROOTPATH/src/mysql/projects/${project_name}/initsql
     cp -a $ROOTPATH/src/mysql/conf.d/* $ROOTPATH/src/mysql/projects/${project_name}/conf.d
     cp -a $ROOTPATH/src/mysql/.env $ROOTPATH/src/mysql/projects/${project_name}/.env && \
-        export envFile="../../../src/mysql/projects/${project_name}/.env"
+        export envFile="$ROOTPATH/src/mysql/projects/${project_name}/.env"
 
     initport=$(cat .port)
     offset=$(find $ROOTPATH/src/mysql/projects/ -maxdepth 1 -type d  |grep -v '\/$'|wc -l)
