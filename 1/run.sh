@@ -20,15 +20,13 @@ install_mysql() {
     mysql_root_password=$5
 
     # 创建一个 docker-compose.yml 文件来定义 MySQL 服务
-    [ -d $ROOTPATH/src/mysql/projects/${project_name} ] &&  \
-        docker-compose -f $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml up -d && \
-        { echo "MySQL [${project_name}] started successfully"; exit 0; }
+    [ -d $ROOTPATH/src/mysql/projects/${project_name} ] && { echo "MySQL [${project_name}] already exists"; exit 1; }
 
     # 安装 MySQL 的具体步骤
     echo "Installing MySQL [${project_name}] ..."
     
     # 创建项目根目录
-    mkdir -p $ROOTPATH/src/mysql/projects/${project_name}/{initsql,conf.d}
+    mkdir -p $ROOTPATH/src/mysql/projects/${project_name}
     # 拷贝公共初始化内容
     cp -a $ROOTPATH/src/mysql/{initsql,conf.d,.env} $ROOTPATH/src/mysql/projects/${project_name} && \
         export envFile="$ROOTPATH/src/mysql/projects/${project_name}/.env"
@@ -102,10 +100,8 @@ status_mysql() {
 # 安装/停止 Starrocks
 install_starrocks() {
     # 创建一个 docker-compose.yml 文件来定义 Starrocks 服务
-    [ -d $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml ] &&  \
-        docker-compose -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml up -d && \
-        { echo "Starrocks [${project_name}] started successfully"; exit 0; }
-
+    [ -d $ROOTPATH/dest/sr/projects/${project_name} ] && { echo "Starrocks [${project_name}] already exists"; exit 1; }
+    
     # 安装 Starrocks 的具体步骤
     echo "Installing Starrocks [${project_name}] ..."
 
@@ -123,7 +119,6 @@ install_starrocks() {
     offset=$(dirsInPath '*' $ROOTPATH/dest/sr/projects |wc -l)
     valid_port=$(expr $init_port + $[$offset*4])
     # 创建一个 docker-compose.yml 文件来定义 Starrocks 服务
-    [ -d $ROOTPATH/dest/sr/projects/${project_name} ] && { echo "Starrocks [${project_name}] already exists"; exit 1; }
     mkdir -p $ROOTPATH/dest/sr/projects/${project_name}
     cp -a $ROOTPATH/dest/sr/{.be.env,.fe.env,conf.d} $ROOTPATH/dest/sr/projects/${project_name} && \
         export envFile="$ROOTPATH/dest/sr/projects/${project_name}/.env"
@@ -239,20 +234,20 @@ install_flink_cdc() {
     taskmanager_num=${2:-"1"}
     slot_num=${3:-"4"}
 
-    [ -d $ROOTPATH/flink/projects/${project_name}/docker-compose.yml ] &&  \
-        docker-compose -f $ROOTPATH/flink/projects/${project_name}/docker-compose.yml up -d && \
-        { echo "Flink CDC [${project_name}] started successfully"; exit 0; }
+    [ -d $ROOTPATH/flink/projects/${project_name} ] && \
+        { echo "Flink CDC [${project_name}] already exists"; exit 1; }
 
+    mkdir -p $ROOTPATH/flink/projects//${project_name}
     read -p "Datasource type to submit, choose one: [$(dirsInPath '*' $ROOTPATH/src|xargs |tr ' ' '|')]: " sourceType && \
         [ -d $ROOTPATH/src/$sourceType ] || { echo "source type $sourceType not found";exit 1; }
     read -p "Please type source project:
         $(dirsInPath '*' $ROOTPATH/src/$sourceType/projects|xargs -n 1)
-    >>> Selected: " sourceProject && \
+>>> Selected: " sourceProject && \
         [ -d $ROOTPATH/src/$sourceType/projects/$sourceProject ] || { echo "source project $sourceProject not found with type $sourceType ";exit 1; }
     
     read -p "Please type starrocks project:
         $(dirsInPath '*' $ROOTPATH/dest/sr/projects|xargs -n 1)
-    >>> Selected: " srProject && \
+>>> Selected: " srProject && \
         [ -d $ROOTPATH/dest/sr/projects/$srProject ] || { echo "starrocks project $srProject not found";exit 1; }
 
     echo "Installing Flink CDC [${project_name}] ..."
