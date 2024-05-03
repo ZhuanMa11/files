@@ -124,15 +124,13 @@ services:
             - -c
             - |
                 /opt/starrocks/fe_entrypoint.sh $project_name-starrocks-fe-0
-        environment:
-            - HOST_TYPE=FQDN
-            - TZ=Asia/Shanghai
         ports:
             - "${valid_port}:8030"
             - "$(expr $valid_port + 1):9020"
             - "$(expr $valid_port + 2):9030"
         volumes:
             - $ROOTPATH/dest/sr/projects/${project_name}/fe0_data:/opt/starrocks/fe/meta
+            - $ROOTPATH/dest/sr/projects/${project_name}/conf.d/fe.conf:/opt/starrocks/fe/conf/fe.conf:ro
         healthcheck:
             test: ["CMD-SHELL", "netstat -tnlp|grep :9030 || exit 1"]
             interval: 10s
@@ -149,9 +147,6 @@ services:
             - -c
             - |
                 /opt/starrocks/be_entrypoint.sh $project_name-starrocks-fe-0
-        environment:
-            - HOST_TYPE=FQDN
-            - TZ=Asia/Shanghai
         ports:
             - "$(expr $valid_port + 3):8040"
         depends_on:
@@ -163,6 +158,7 @@ services:
             retries: 3
         volumes:
             - $ROOTPATH/dest/sr/projects/${project_name}/be0_data:/opt/starrocks/be/storage
+            - $ROOTPATH/dest/sr/projects/${project_name}/conf.d/be.conf:/opt/starrocks/be/conf/be.conf:ro
 networks:
     $project_name:
         driver: bridge
