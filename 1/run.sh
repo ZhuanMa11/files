@@ -3,6 +3,8 @@ set -e
 # 函数初始化
 source ./util.sh
 
+ROOTPATH=$(cd "$(dirname $0)";pwd)
+
 # 安装/停止 MySQL
 install_mysql() {
     # 检查用户是否提供了参数
@@ -18,29 +20,29 @@ install_mysql() {
     mysql_root_password=$5
 
     # 创建一个 docker-compose.yml 文件来定义 MySQL 服务
-    [ -d src/mysql/projects/${project_name}/docker-compose.yml ] &&  \
-        docker-compose -f src/mysql/projects/${project_name}/docker-compose.yml up -d && \
+    [ -d $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml ] &&  \
+        docker-compose -f $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml up -d && \
         { echo "MySQL [$project_name] started successfully"; exit 0; }
 
     # 安装 MySQL 的具体步骤
     echo "Installing MySQL [$project_name] ..."
     
     # 创建项目根目录
-    mkdir -p src/mysql/projects/${project_name}/{initsql,conf.d}
+    mkdir -p $ROOTPATH/src/mysql/projects/${project_name}/{initsql,conf.d}
     # 拷贝公共初始化内容
-    cp -a src/mysql/initsql/* src/mysql/projects/${project_name}/initsql
-    cp -a src/mysql/conf.d/* src/mysql/projects/${project_name}/conf.d
-    cp -a src/mysql/.env src/mysql/projects/${project_name}/.env && \
-        export envFile="$(dirname $0)/src/mysql/projects/${project_name}/.env"
+    cp -a $ROOTPATH/src/mysql/initsql/* $ROOTPATH/src/mysql/projects/${project_name}/initsql
+    cp -a $ROOTPATH/src/mysql/conf.d/* $ROOTPATH/src/mysql/projects/${project_name}/conf.d
+    cp -a $ROOTPATH/src/mysql/.env $ROOTPATH/src/mysql/projects/${project_name}/.env && \
+        export envFile="../../../src/mysql/projects/${project_name}/.env"
 
     initport=$(cat .port)
-    offset=$(find src/mysql/projects/ -maxdepth 1 -type d  |grep -v '\/$'|wc -l)
+    offset=$(find $ROOTPATH/src/mysql/projects/ -maxdepth 1 -type d  |grep -v '\/$'|wc -l)
     setEnvItemMust MYSQL_DATABASE       $mysql_dbname $envFile
     setEnvItemMust MYSQL_USER           $mysql_username $envFile
     setEnvItemMust MYSQL_PASSWORD       $mysql_password $envFile
     setEnvItemMust MYSQL_ROOT_PASSWORD  $mysql_root_password $envFile
 
-    cat << EOF > src/mysql/projects/${project_name}/docker-compose.yml
+    cat << EOF > $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml
 version: '3.9'
 services:
     mysql:
@@ -64,30 +66,30 @@ networks:
 EOF
 
     # 使用 Docker Compose 启动 MySQL 服务
-    docker-compose up -f src/mysql/projects/${project_name}/docker-compose.yml -d && \
+    docker-compose up -f $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml -d && \
     echo "MySQL [$project_name] installed successfully"
 }
 
 stop_mysql() {
-    find src/mysql/projects/ -maxdepth 1 -type d  |grep -v '\/$'|xargs -i basename {}
+    find $ROOTPATH/src/mysql/projects/ -maxdepth 1 -type d  |grep -v '\/$'|xargs -i basename {}
     read -p "project_to_stop" name
     if [ "a$name" == "a" ] || \
-        [ ! -f src/mysql/projects/$name/docker-compose.yml ]; then
+        [ ! -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml ]; then
         echo "invalid project name"
         exit 1
     fi
 
     # 停止 MySQL 的具体步骤
     echo "Stopping MySQL [$project_name] ..."
-    docker-compose down -f src/mysql/projects/$name/docker-compose.yml && \
+    docker-compose down -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml && \
     echo "MySQL [$project_name] stopped successfully"
 }
 
 # 安装/停止 Starrocks
 install_starrocks() {
     # 创建一个 docker-compose.yml 文件来定义 Starrocks 服务
-    [ -d dest/sr/projects/${project_name}/docker-compose.yml ] &&  \
-        docker-compose -f dest/sr/projects/${project_name}/docker-compose.yml up -d && \
+    [ -d $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml ] &&  \
+        docker-compose -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml up -d && \
         { echo "Starrocks [$project_name] started successfully"; exit 0; }
 
     # 安装 Starrocks 的具体步骤
@@ -103,15 +105,15 @@ install_starrocks() {
     project_name=$1
     starrocks_version=${2:-"latest"}
     init_port=$(cat .port)
-    offset=$(find dest/sr/projects/ -maxdepth 1 -type d  |grep -v '\/$'|wc -l)
+    offset=$(find $ROOTPATH/dest/sr/projects/ -maxdepth 1 -type d  |grep -v '\/$'|wc -l)
     valid_port=$(expr $init_port + $[$offset*4])
     # 创建一个 docker-compose.yml 文件来定义 Starrocks 服务
-    [ -d dest/sr/projects/${project_name} ] && { echo "Starrocks [$project_name] already exists"; exit 1; }
-    mkdir -p dest/sr/projects/${project_name}
-    cp -a dest/sr/.be.env dest/sr/projects/${project_name}
-    cp -a dest/sr/.fe.env dest/sr/projects/${project_name}
+    [ -d $ROOTPATH/dest/sr/projects/${project_name} ] && { echo "Starrocks [$project_name] already exists"; exit 1; }
+    mkdir -p $ROOTPATH/dest/sr/projects/${project_name}
+    cp -a $ROOTPATH/dest/sr/.be.env $ROOTPATH/dest/sr/projects/${project_name}
+    cp -a $ROOTPATH/dest/sr/.fe.env $ROOTPATH/dest/sr/projects/${project_name}
 
-    cat <<EOF > dest/sr/projects/${project_name}/docker-compose.yml
+    cat <<EOF > $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml
 version: "3.9"
 services:
     starrocks-fe-0:
@@ -119,7 +121,7 @@ services:
         hostname: $project_name-starrocks-fe-0
         container_name: $project_name-starrocks-fe-0
         env_file:
-            - dest/sr/projects/${project_name}/.fe.env
+            - $ROOTPATH/dest/sr/projects/${project_name}/.fe.env
         command:
             - /bin/bash
             - -c
@@ -133,7 +135,7 @@ services:
             - "$(expr $valid_port + 1):9020"
             - "$(expr $valid_port + 2):9030"
         volumes:
-            - dest/sr/projects/${project_name}/fe0_data:/opt/starrocks/fe/meta
+            - $ROOTPATH/dest/sr/projects/${project_name}/fe0_data:/opt/starrocks/fe/meta
         healthcheck:
             test: ["CMD-SHELL", "netstat -tnlp|grep :9030 || exit 1"]
             interval: 10s
@@ -144,7 +146,7 @@ services:
         hostname: $project_name-starrocks-be-0
         container_name: $project_name-starrocks-be-0
         env_file:
-            - dest/sr/projects/${project_name}/.be.env
+            - $ROOTPATH/dest/sr/projects/${project_name}/.be.env
         command:
             - /bin/bash
             - -c
@@ -163,28 +165,28 @@ services:
             timeout: 10s
             retries: 3
         volumes:
-            - dest/sr/projects/${project_name}/be0_data:/opt/starrocks/be/storage
+            - $ROOTPATH/dest/sr/projects/${project_name}/be0_data:/opt/starrocks/be/storage
 networks:
     $project_name:
         driver: bridge
 EOF
 
 # 使用 Docker Compose 启动 Starrocks 服务
-docker-compose up -f dest/sr/projects/${project_name}/docker-compose.yml -d && \
+docker-compose up -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml -d && \
         { echo "Starrocks [$project_name] installed successfully"; exit 0; }
 }
 
 stop_starrocks() {
-    find dest/sr/projects/ -maxdepth 1 -type d  |grep -v '\/$'|xargs -i basename {}
+    find $ROOTPATH/dest/sr/projects/ -maxdepth 1 -type d  |grep -v '\/$'|xargs -i basename {}
     read -p "project_to_stop" name
     if [ "a$name" == "a" ] || \
-        [ ! -f dest/sr/projects/$name/docker-compose.yml ]; then
+        [ ! -f $ROOTPATH/dest/sr/projects/$name/docker-compose.yml ]; then
         echo "invalid project name"
         exit 1
     fi
     # 停止 Starrocks 的具体步骤
     echo "Stopping Starrocks [$project_name] ..."
-    docker-compose down -f dest/sr/projects/$name/docker-compose.yml && \
+    docker-compose down -f $ROOTPATH/dest/sr/projects/$name/docker-compose.yml && \
     # your stopation commands here
     echo "Starrocks [$project_name] stopped successfully"
 }
