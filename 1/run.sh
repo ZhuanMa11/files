@@ -55,9 +55,9 @@ services:
         networks:
             - $project_name
         volumes:
-            - ./src/mysql/projects/${project_name}/conf.d:/etc/mysql/conf.d
-            - ./src/mysql/projects/${project_name}/data:/var/lib/mysql
-            - ./src/mysql/projects/${project_name}/initsql:/docker-entrypoint-initdb.d
+            - $ROOTPATH/src/mysql/projects/${project_name}/conf.d:/etc/mysql/conf.d
+            - $ROOTPATH/src/mysql/projects/${project_name}/data:/var/lib/mysql
+            - $ROOTPATH/src/mysql/projects/${project_name}/initsql:/docker-entrypoint-initdb.d
 networks:
     $project_name:
         driver: bridge
