@@ -22,10 +22,10 @@ install_mysql() {
     # 创建一个 docker-compose.yml 文件来定义 MySQL 服务
     [ -d $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml ] &&  \
         docker-compose -f $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml up -d && \
-        { echo "MySQL [$project_name] started successfully"; exit 0; }
+        { echo "MySQL [${project_name}] started successfully"; exit 0; }
 
     # 安装 MySQL 的具体步骤
-    echo "Installing MySQL [$project_name] ..."
+    echo "Installing MySQL [${project_name}] ..."
     
     # 创建项目根目录
     mkdir -p $ROOTPATH/src/mysql/projects/${project_name}/{initsql,conf.d}
@@ -46,30 +46,28 @@ services:
     mysql:
         image: mysql:latest
         restart: always
-        hostname: $project_name-mysql
-        container_name: $project_name-mysql
         env_file:
             - $envFile
         ports:
             - "$(expr $initport - $offset):3306"
         networks:
-            - $project_name
+            - ${project_name}
         volumes:
             - $ROOTPATH/src/mysql/projects/${project_name}/conf.d:/etc/mysql/conf.d
             - $ROOTPATH/src/mysql/projects/${project_name}/data:/var/lib/mysql
             - $ROOTPATH/src/mysql/projects/${project_name}/initsql:/docker-entrypoint-initdb.d
 networks:
-    $project_name:
+    ${project_name}:
         driver: bridge
 EOF
 
     # 使用 Docker Compose 启动 MySQL 服务
     docker-compose -f $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml up -d && \
-    echo "MySQL [$project_name] installed successfully"
+    echo "MySQL [${project_name}] installed successfully"
 }
 
 stop_mysql() {
-    find $ROOTPATH/src/mysql/projects/ -maxdepth 1 -type d  |grep -v '\/$'|xargs -i basename {}
+    dirsInPath '*' $ROOTPATH/src/mysql/projects/
     read -p "project_to_stop" name
     if [ "a$name" == "a" ] || \
         [ ! -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml ]; then
@@ -78,9 +76,25 @@ stop_mysql() {
     fi
 
     # 停止 MySQL 的具体步骤
-    echo "Stopping MySQL [$project_name] ..."
+    echo "Stopping MySQL [${project_name}] ..."
     docker-compose -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml down && \
-    echo "MySQL [$project_name] stopped successfully"
+    echo "MySQL [${project_name}] stopped successfully"
+}
+
+list_mysql() {
+    echo "MySQL List:"
+    dirsInPath '*' $ROOTPATH/src/mysql/projects/
+}
+
+status_mysql() {
+    dirsInPath '*' $ROOTPATH/src/mysql/projects/
+    read -p "project_to_check" name
+    if [ "a$name" == "a" ] || \
+        [ ! -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml ]; then
+        echo "invalid project status"
+        exit 1
+    fi
+    docker-compose -f  $ROOTPATH/src/mysql/projects/$name/docker-compose.yml ps
 }
 
 # 安装/停止 Starrocks
@@ -88,10 +102,10 @@ install_starrocks() {
     # 创建一个 docker-compose.yml 文件来定义 Starrocks 服务
     [ -d $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml ] &&  \
         docker-compose -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml up -d && \
-        { echo "Starrocks [$project_name] started successfully"; exit 0; }
+        { echo "Starrocks [${project_name}] started successfully"; exit 0; }
 
     # 安装 Starrocks 的具体步骤
-    echo "Installing Starrocks [$project_name] ..."
+    echo "Installing Starrocks [${project_name}] ..."
 
     # 检查用户是否提供了参数
     if [ $# -eq 0 ]; then
@@ -106,24 +120,22 @@ install_starrocks() {
     offset=$(find $ROOTPATH/dest/sr/projects/ -maxdepth 1 -type d  |grep -v '\/$'|wc -l)
     valid_port=$(expr $init_port + $[$offset*4])
     # 创建一个 docker-compose.yml 文件来定义 Starrocks 服务
-    [ -d $ROOTPATH/dest/sr/projects/${project_name} ] && { echo "Starrocks [$project_name] already exists"; exit 1; }
+    [ -d $ROOTPATH/dest/sr/projects/${project_name} ] && { echo "Starrocks [${project_name}] already exists"; exit 1; }
     mkdir -p $ROOTPATH/dest/sr/projects/${project_name}
     cp -a $ROOTPATH/dest/sr/{.be.env,.fe.env,conf.d} $ROOTPATH/dest/sr/projects/${project_name}
 
     cat <<EOF > $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml
 version: "3.9"
 services:
-    starrocks-fe-0:
+    starrocks-fe:
         image: starrocks/fe-ubuntu:${starrocks_version}
-        hostname: $project_name-starrocks-fe-0
-        container_name: $project_name-starrocks-fe-0
         env_file:
             - $ROOTPATH/dest/sr/projects/${project_name}/.fe.env
         command:
             - /bin/bash
             - -c
             - |
-                /opt/starrocks/fe_entrypoint.sh $project_name-starrocks-fe-0
+                /opt/starrocks/fe_entrypoint.sh ${project_name}_starrocks-fe_1
         ports:
             - "${valid_port}:8030"
             - "$(expr $valid_port + 1):9020"
@@ -136,21 +148,19 @@ services:
             interval: 10s
             timeout: 10s
             retries: 3
-    starrocks-be-0:
+    starrocks-be:
         image: starrocks/be-ubuntu:${starrocks_version}
-        hostname: $project_name-starrocks-be-0
-        container_name: $project_name-starrocks-be-0
         env_file:
             - $ROOTPATH/dest/sr/projects/${project_name}/.be.env
         command:
             - /bin/bash
             - -c
             - |
-                /opt/starrocks/be_entrypoint.sh $project_name-starrocks-fe-0
+                /opt/starrocks/be_entrypoint.sh ${project_name}_starrocks-fe_1
         ports:
             - "$(expr $valid_port + 3):8040"
         depends_on:
-            - starrocks-fe-0
+            - starrocks-fe
         healthcheck:
             test: ["CMD-SHELL", "netstat -tnlp|grep :8040 || exit 1"]
             interval: 10s
@@ -160,13 +170,13 @@ services:
             - $ROOTPATH/dest/sr/projects/${project_name}/be0_data:/opt/starrocks/be/storage
             - $ROOTPATH/dest/sr/projects/${project_name}/conf.d/be.conf:/opt/starrocks/be/conf/be.conf:ro
 networks:
-    $project_name:
+    ${project_name}:
         driver: bridge
 EOF
 
 # 使用 Docker Compose 启动 Starrocks 服务
 docker-compose -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml up -d && \
-        { echo "Starrocks [$project_name] installed successfully"; exit 0; }
+        { echo "Starrocks [${project_name}] installed successfully"; exit 0; }
 }
 
 stop_starrocks() {
@@ -178,17 +188,33 @@ stop_starrocks() {
         exit 1
     fi
     # 停止 Starrocks 的具体步骤
-    echo "Stopping Starrocks [$project_name] ..."
+    echo "Stopping Starrocks [${project_name}] ..."
     docker-compose -f $ROOTPATH/dest/sr/projects/$name/docker-compose.yml down && \
     # your stopation commands here
-    echo "Starrocks [$project_name] stopped successfully"
+    echo "Starrocks [${project_name}] stopped successfully"
+}
+
+list_starrocks() {
+    echo "Starrocks List:"
+    dirsInPath '*' $ROOTPATH/dest/sr/projects/
+}
+
+status_mysql() {
+    dirsInPath '*' $ROOTPATH/dest/sr/projects/
+    read -p "project_to_check" name
+    if [ "a$name" == "a" ] || \
+        [ ! -f $ROOTPATH/dest/sr/projects/$name/docker-compose.yml ]; then
+        echo "invalid project status"
+        exit 1
+    fi
+    docker-compose -f  $ROOTPATH/dest/sr/projects/$name/docker-compose.yml ps
 }
 
 # 安装/停止 Flink CDC，并配置自动同步 MySQL 的 sample 数据库到 Starrocks
 install_flink_cdc() {
     [ -d $ROOTPATH/flink/projects/${project_name}/docker-compose.yml ] &&  \
         docker-compose -f $ROOTPATH/flink/projects/${project_name}/docker-compose.yml up -d && \
-        { echo "Flink CDC [$project_name] started successfully"; exit 0; }
+        { echo "Flink CDC [${project_name}] started successfully"; exit 0; }
 
     read -p "Datasource type to submit, choose one: [$(dirsInPath '*' $ROOTPATH/src|xargs |tr ' ' '|')]: " sourceType && \
         [ -d $ROOTPATH/src/$sourceType ] || { echo "source type $sourceType not found";exit 1; }
@@ -203,14 +229,12 @@ install_flink_cdc() {
         [ -d $ROOTPATH/dest/sr/project/$srProject ] || { echo "starrocks project $srProject not found";exit 1; }
 
     # 安装 Flink CDC 的具体步骤
-    echo "Installing Flink CDC [$project_name] ..."
+    echo "Installing Flink CDC [${project_name}] ..."
     cat <<EOF > $ROOTPATH/flink/projects/${project_name}/docker-compose.yml
     version: "3.9"
     services:
         jobmanager:
             image: flink:1.14.4-scala_2.11
-            hostname: $project_name-jobmanager
-            container_name: $project_name-jobmanager
             ports:
             - "8081:8081"
             command: jobmanager
@@ -222,21 +246,20 @@ install_flink_cdc() {
             environment:
             - |
                 FLINK_PROPERTIES=
-                jobmanager.rpc.address: $project_name-jobmanager
+                jobmanager.rpc.address: ${project_name}_jobmanager_1
 
         taskmanager:
             image: flink:1.14.4-scala_2.11
-            hostname: $project_name-taskmanager-0
-            container_name: $project_name-taskmanager-0
             depends_on:
             - jobmanager
             command: taskmanager
-            scale: 1
+            deploy:
+                replicas: 1
             environment:
             - |
                 FLINK_PROPERTIES=
-                jobmanager.rpc.address: $project_name-jobmanager
-                taskmanager.numberOfTaskSlots: 4   
+                jobmanager.rpc.address: ${project_name}_jobmanager_1
+                taskmanager.numberOfTaskSlots: 4
 EOF
     # your installation commands here
     echo "Flink CDC installed successfully"
@@ -254,23 +277,56 @@ stop_flink_cdc() {
     echo "Flink CDC stopped successfully"
 }
 
+list_flink_cdc() {
+    echo "Flink CDC List:"
+    dirsInPath '*' $ROOTPATH/flink/projects/
+}
+
+status_flink_cdc() {
+    dirsInPath '*' $ROOTPATH/flink/projects/
+    read -p "project_to_check" name
+    if [ "a$name" == "a" ] || \
+        [ ! -f $ROOTPATH/flink/projects/$name/docker-compose.yml ]; then
+        echo "invalid project status"
+        exit 1
+    fi
+    docker-compose -f  $ROOTPATH/flink/projects/$name/docker-compose.yml ps
+}
+
 # 主菜单
 echo "Welcome to the DevOps Tool"
 echo "1. Install MySQL"
 echo "2. Stop MySQL"
-echo "3. Install Starrocks"
-echo "4. Stop Starrocks"
-echo "5. Install Flink CDC and configure synchronization"
-echo "6. Stop Flink CDC"
-echo "Enter your choice (1-6): "
+echo "3. List MySQL"
+echo "4. Status MySQL"
+echo "5. Install Starrocks"
+echo "6. Stop Starrocks"
+echo "7. List Starrocks"
+echo "8. Status Starrocks"
+echo "9. Install Flink CDC and configure synchronization"
+echo "10. Stop Flink CDC"
+echo "11. List Flink CDC"
+echo "12. Status Flink CDC"
+echo "Enter your choice (1-12): "
 read choice
 
 case $choice in
+    # mysql 
     1) install_mysql "$@" ;;
     2) stop_mysql "$@";;
-    3) install_starrocks "$@";;
-    4) stop_starrocks "$@";;
-    5) install_flink_cdc "$@";;
-    6) stop_flink_cdc "$@";;
+    3) list_mysql "$@";;
+    4) status_mysql "$@";;
+
+    # starrocks
+    5) install_starrocks "$@";;
+    6) stop_starrocks "$@";;
+    7) list_starrocks "$@";;
+    8) status_starrocks "$@";;
+
+    # flink cdc
+    9) install_flink_cdc "$@";;
+    10) stop_flink_cdc "$@";;
+    11) list_flink_cdc "$@";;
+    12) status_flink_cdc "$@";;
     *) echo "Invalid choice" ;;
 esac
