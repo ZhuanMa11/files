@@ -186,8 +186,58 @@ stop_starrocks() {
 
 # 安装/停止 Flink CDC，并配置自动同步 MySQL 的 sample 数据库到 Starrocks
 install_flink_cdc() {
+    [ -d $ROOTPATH/flink/projects/${project_name}/docker-compose.yml ] &&  \
+        docker-compose -f $ROOTPATH/flink/projects/${project_name}/docker-compose.yml up -d && \
+        { echo "Flink CDC [$project_name] started successfully"; exit 0; }
+
+    read -p "Datasource type to submit, choose one: [$(dirsInPath '*' $ROOTPATH/src|xargs |tr ' ' '|')]: " sourceType && \
+        [ -d $ROOTPATH/src/$sourceType ] || { echo "source type $sourceType not found";exit 1; }
+    read -p "Please type source project:
+        $(dirsInPath '*' $ROOTPATH/src/$sourceType|xargs -n 1)
+    >>> Selected: " sourceProject && \
+        [ -d $ROOTPATH/src/$sourceType/$sourceProject ] || { echo "source project $sourceProject not found with type $sourceType ";exit 1; }
+    
+    read -p "Please type starrocks project:
+        $(dirsInPath '*' $ROOTPATH/dest/sr/projects|xargs -n 1)
+    >>> Selected: " srProject && \
+        [ -d $ROOTPATH/dest/sr/project/$srProject ] || { echo "starrocks project $srProject not found";exit 1; }
+
     # 安装 Flink CDC 的具体步骤
-    echo "Installing Flink CDC..."
+    echo "Installing Flink CDC [$project_name] ..."
+    cat <<EOF > $ROOTPATH/flink/projects/${project_name}/docker-compose.yml
+    version: "3.9"
+    services:
+        jobmanager:
+            image: flink:1.14.4-scala_2.11
+            hostname: $project_name-jobmanager
+            container_name: $project_name-jobmanager
+            ports:
+            - "8081:8081"
+            command: jobmanager
+            env_file:
+                - $ROOTPATH/flink/.env
+            volumes:
+                - $ROOTPATH/flink/projects/${project_name}/checkpoint:/opt/flink/checkpoint
+                - $ROOTPATH/flink/projects/${project_name}/savepoint:/opt/flink/savepoint
+            environment:
+            - |
+                FLINK_PROPERTIES=
+                jobmanager.rpc.address: $project_name-jobmanager
+
+        taskmanager:
+            image: flink:1.14.4-scala_2.11
+            hostname: $project_name-taskmanager-0
+            container_name: $project_name-taskmanager-0
+            depends_on:
+            - jobmanager
+            command: taskmanager
+            scale: 1
+            environment:
+            - |
+                FLINK_PROPERTIES=
+                jobmanager.rpc.address: $project_name-jobmanager
+                taskmanager.numberOfTaskSlots: 4   
+EOF
     # your installation commands here
     echo "Flink CDC installed successfully"
 

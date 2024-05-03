@@ -18,3 +18,10 @@ function setEnvItemMust() {
     grep -q "^$key=" $file && sed sed -i "s#$key=.*#$key=$newval#g" $file || 
         echo "$key=$newval" >> $file
 }
+
+# 获取路径下的目录名称
+function dirsInPath() {
+    glob=$1
+    path=$2
+    find $path/* -maxdepth 0 -name "$1"  -type d |awk -F '/' '{print $NF}'
+}
