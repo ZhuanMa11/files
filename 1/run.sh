@@ -229,6 +229,16 @@ status_starrocks() {
 
 # 安装/停止 Flink CDC，并配置自动同步 MySQL 的 sample 数据库到 Starrocks
 install_flink_cdc() {
+    # 检查用户是否提供了参数
+    if [ $# -eq 0 ]; then
+        echo "Usage: $0 <project_name> <taskmanager_num> <slot_num>"
+        exit 1
+    fi
+
+    project_name=$1
+    taskmanager_num=${2:-"1"}
+    slot_num=${3:-"4"}
+
     [ -d $ROOTPATH/flink/projects/${project_name}/docker-compose.yml ] &&  \
         docker-compose -f $ROOTPATH/flink/projects/${project_name}/docker-compose.yml up -d && \
         { echo "Flink CDC [${project_name}] started successfully"; exit 0; }
@@ -273,7 +283,7 @@ install_flink_cdc() {
             - jobmanager
             command: taskmanager
             deploy:
-                replicas: 1
+                replicas: ${taskmanager_num}
             networks:
                 - ${sourceType}_${sourceProject}
                 - sr_${srProject}
@@ -281,7 +291,7 @@ install_flink_cdc() {
             - |
                 FLINK_PROPERTIES=
                 jobmanager.rpc.address: ${project_name}_jobmanager_1
-                taskmanager.numberOfTaskSlots: 4
+                taskmanager.numberOfTaskSlots: ${slot_num}
 EOF
     docker-compose -f $ROOTPATH/flink/projects/${project_name}/docker-compose.yml up -d && \
         { echo "Flink CDC [$project_name] installed successfully"; exit 0; }
