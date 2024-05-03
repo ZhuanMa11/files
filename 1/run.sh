@@ -66,19 +66,22 @@ EOF
 }
 
 stop_mysql() {
-    dirsInPath '*' $ROOTPATH/src/mysql/projects/
-    read -p "Select project to be stopped: " name
-    [ "a$name" == "a" ] && \
-        { echo "invalid project name"; exit 1; }
-
-    [ ! -d $ROOTPATH/src/mysql/projects/$name ] && \
-        { echo "project $name not found"; exit 1; }
-    [ ! -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml ] && \
-         { echo "Mysql unable to stop,maybe external"; exit 0; }
+    # 检查用户是否提供了参数
+    if [ $# -eq 0 ]; then
+        echo "Usage: $0 <project_name>"
+        exit 1
+    fi
+    
+    project_name=$1
+    if [ "a$project_name" == "a" ] || \
+        [ ! -f $ROOTPATH/src/mysql/projects/$project_name/docker-compose.yml ]; then
+        echo "invalid project name"
+        exit 1
+    fi
+    # 停止 Starrocks 的具体步骤
     echo "Stopping MySQL [${project_name}] ..."
-    # 停止 MySQL 的具体步骤
-    docker-compose -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml down && \
-    echo "MySQL [${project_name}] stopped successfully"
+    docker-compose -f $ROOTPATH/src/mysql/projects/$project_name/docker-compose.yml down && \
+        echo "MySQL [${project_name}] stopped successfully"
 }
 
 list_mysql() {
@@ -191,16 +194,21 @@ EOF
 }
 
 stop_starrocks() {
-    dirsInPath '*' $ROOTPATH/dest/sr/projects/
-    read -p "Select project to be stopped: " name
-    if [ "a$name" == "a" ] || \
-        [ ! -f $ROOTPATH/dest/sr/projects/$name/docker-compose.yml ]; then
+    # 检查用户是否提供了参数
+    if [ $# -eq 0 ]; then
+        echo "Usage: $0 <project_name>"
+        exit 1
+    fi
+
+    project_name=$1
+    if [ "a$project_name" == "a" ] || \
+        [ ! -f $ROOTPATH/dest/sr/projects/$project_name/docker-compose.yml ]; then
         echo "invalid project name"
         exit 1
     fi
     # 停止 Starrocks 的具体步骤
     echo "Stopping Starrocks [${project_name}] ..."
-    docker-compose -f $ROOTPATH/dest/sr/projects/$name/docker-compose.yml down && \
+    docker-compose -f $ROOTPATH/dest/sr/projects/$project_name/docker-compose.yml down && \
         echo "Starrocks [${project_name}] stopped successfully"
 }
 
@@ -322,10 +330,22 @@ EOF
 }
 
 stop_flink_cdc() {
-    # 停止 Flink CDC 的具体步骤
-    echo "Stopping Flink CDC..."
-    # your stopation commands here
-    echo "Flink CDC stopped successfully"
+    # 检查用户是否提供了参数
+    if [ $# -eq 0 ]; then
+        echo "Usage: $0 <project_name>"
+        exit 1
+    fi
+    
+    project_name=$1
+    if [ "a$project_name" == "a" ] || \
+        [ ! -f $ROOTPATH/flink/projects/$project_name/docker-compose.yml ]; then
+        echo "invalid project name"
+        exit 1
+    fi
+    # 停止 Starrocks 的具体步骤
+    echo "Stopping Flink CDC [${project_name}] ..."
+    docker-compose -f $ROOTPATH/flink/projects/$project_name/docker-compose.yml down && \
+        echo "Flink CDC [${project_name}] stopped successfully"
 }
 
 list_flink_cdc() {
