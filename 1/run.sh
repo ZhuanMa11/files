@@ -243,7 +243,7 @@ install_flink_cdc() {
     read -p "Please type starrocks project:
         $(dirsInPath '*' $ROOTPATH/dest/sr/projects|xargs -n 1)
     >>> Selected: " srProject && \
-        [ -d $ROOTPATH/dest/sr/project/$srProject ] || { echo "starrocks project $srProject not found";exit 1; }
+        [ -d $ROOTPATH/dest/sr/projects/$srProject ] || { echo "starrocks project $srProject not found";exit 1; }
 
     echo "Installing Flink CDC [${project_name}] ..."
     # 安装 Flink CDC 的具体步骤
@@ -294,7 +294,7 @@ EOF
     echo "Table patterns: "
     read TABLE_PATTERN
 
-    source $ROOTPATH/src/$sourceType/$sourceProject/.env
+    source $ROOTPATH/src/$sourceType/projects/$sourceProject/.env
     source $ROOTPATH/dest/sr/projects/$srProject/.env
 
     [ ! -f $ROOTPATH/flink/tools/smt/starrocks-migrate-tool ] && \
@@ -303,9 +303,9 @@ EOF
 
     SMTCONF=$ROOTPATH/flink/projects/${project_name}/smt.conf
 
-    sh $ROOTPATH/src/$sourceType/$sourceProject/.smt.sh >   $SMTCONF
-    sh $ROOTPATH/dest/sr/$srProject/.smt.sh             >>  $SMTCONF
-    $ROOTPATH/flink/tools/smt/starrocks-migrate-tool -c     $SMTCONF
+    sh $ROOTPATH/src/$sourceType/.smt.sh            >   $SMTCONF
+    sh $ROOTPATH/dest/sr/.smt.sh                    >>  $SMTCONF
+    $ROOTPATH/flink/tools/smt/starrocks-migrate-tool -c $SMTCONF
 
     docker cp $OUTPUT_DIR ${srProject}_starrocks-fe_1:/tmp
     docker cp $OUTPUT_DIR ${project_name}_jobmanager_1:/tmp
