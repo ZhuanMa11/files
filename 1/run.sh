@@ -64,7 +64,7 @@ networks:
 EOF
 
     # 使用 Docker Compose 启动 MySQL 服务
-    docker-compose up -f $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml -d && \
+    docker-compose -f $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml up -d && \
     echo "MySQL [$project_name] installed successfully"
 }
 
@@ -79,7 +79,7 @@ stop_mysql() {
 
     # 停止 MySQL 的具体步骤
     echo "Stopping MySQL [$project_name] ..."
-    docker-compose down -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml && \
+    docker-compose -f $ROOTPATH/src/mysql/projects/$name/docker-compose.yml down && \
     echo "MySQL [$project_name] stopped successfully"
 }
 
@@ -165,7 +165,7 @@ networks:
 EOF
 
 # 使用 Docker Compose 启动 Starrocks 服务
-docker-compose up -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml -d && \
+docker-compose -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml up -d && \
         { echo "Starrocks [$project_name] installed successfully"; exit 0; }
 }
 
@@ -179,7 +179,7 @@ stop_starrocks() {
     fi
     # 停止 Starrocks 的具体步骤
     echo "Stopping Starrocks [$project_name] ..."
-    docker-compose down -f $ROOTPATH/dest/sr/projects/$name/docker-compose.yml && \
+    docker-compose -f $ROOTPATH/dest/sr/projects/$name/docker-compose.yml down && \
     # your stopation commands here
     echo "Starrocks [$project_name] stopped successfully"
 }
