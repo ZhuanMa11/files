@@ -99,12 +99,6 @@ status_mysql() {
 
 # 安装/停止 Starrocks
 install_starrocks() {
-    # 创建一个 docker-compose.yml 文件来定义 Starrocks 服务
-    [ -d $ROOTPATH/dest/sr/projects/${project_name} ] && { echo "Starrocks [${project_name}] already exists"; exit 1; }
-    
-    # 安装 Starrocks 的具体步骤
-    echo "Installing Starrocks [${project_name}] ..."
-
     # 检查用户是否提供了参数
     if [ $# -eq 0 ]; then
         echo "Usage: $0 <project_name> <starrocks_version> <be_num>"
@@ -118,6 +112,10 @@ install_starrocks() {
     init_port=$(cat .port)
     offset=$(dirsInPath '*' $ROOTPATH/dest/sr/projects |wc -l)
     valid_port=$(expr $init_port + $[$offset*4])
+
+    [ -d $ROOTPATH/dest/sr/projects/${project_name} ] && { echo "Starrocks [${project_name}] already exists"; exit 1; }
+    # 安装 Starrocks 的具体步骤
+    echo "Installing Starrocks [${project_name}] ..."
     # 创建一个 docker-compose.yml 文件来定义 Starrocks 服务
     mkdir -p $ROOTPATH/dest/sr/projects/${project_name}
     cp -a $ROOTPATH/dest/sr/{.be.env,.fe.env,conf.d} $ROOTPATH/dest/sr/projects/${project_name} && \
