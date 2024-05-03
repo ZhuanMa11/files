@@ -34,11 +34,12 @@ install_mysql() {
         export envFile="$ROOTPATH/src/mysql/projects/${project_name}/.env"
 
     initport=$(cat .port)
-    offset=$(find $ROOTPATH/src/mysql/projects/ -maxdepth 1 -type d  |grep -v '\/$'|wc -l)
-    setEnvItemMust MYSQL_DATABASE       $mysql_dbname $envFile
-    setEnvItemMust MYSQL_USER           $mysql_username $envFile
-    setEnvItemMust MYSQL_PASSWORD       $mysql_password $envFile
-    setEnvItemMust MYSQL_ROOT_PASSWORD  $mysql_root_password $envFile
+    offset=$(dirsInPath '*' $ROOTPATH/src/mysql/projects |wc -l)
+    setEnvItemMust MYSQL_DATABASE       $mysql_dbname           $envFile
+    setEnvItemMust MYSQL_HOST           ${project}_mysql_1      $envFile
+    setEnvItemMust MYSQL_USER           $mysql_username         $envFile
+    setEnvItemMust MYSQL_PASSWORD       $mysql_password         $envFile
+    setEnvItemMust MYSQL_ROOT_PASSWORD  $mysql_root_password    $envFile
 
     cat << EOF > $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml
 version: '3.9'
@@ -51,13 +52,13 @@ services:
         ports:
             - "$(expr $initport - $offset):3306"
         networks:
-            - ${project_name}
+            - mysql_${project_name}
         volumes:
             - $ROOTPATH/src/mysql/projects/${project_name}/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf:ro
             - $ROOTPATH/src/mysql/projects/${project_name}/data:/var/lib/mysql
             - $ROOTPATH/src/mysql/projects/${project_name}/initsql:/docker-entrypoint-initdb.d
 networks:
-    ${project_name}:
+    mysql_${project_name}:
         driver: bridge
 EOF
 
@@ -110,20 +111,30 @@ install_starrocks() {
 
     # 检查用户是否提供了参数
     if [ $# -eq 0 ]; then
-        echo "Usage: $0 <project_name> <starrocks_version>"
+        echo "Usage: $0 <project_name> <starrocks_version> <be_num>"
         exit 1
     fi
 
     # 用户传入的参数
     project_name=$1
     starrocks_version=${2:-"latest"}
+    be_num=${3:-"1"}
     init_port=$(cat .port)
-    offset=$(find $ROOTPATH/dest/sr/projects/ -maxdepth 1 -type d  |grep -v '\/$'|wc -l)
+    offset=$(dirsInPath '*' $ROOTPATH/dest/sr/projects |wc -l)
     valid_port=$(expr $init_port + $[$offset*4])
     # 创建一个 docker-compose.yml 文件来定义 Starrocks 服务
     [ -d $ROOTPATH/dest/sr/projects/${project_name} ] && { echo "Starrocks [${project_name}] already exists"; exit 1; }
     mkdir -p $ROOTPATH/dest/sr/projects/${project_name}
-    cp -a $ROOTPATH/dest/sr/{.be.env,.fe.env,conf.d} $ROOTPATH/dest/sr/projects/${project_name}
+    cp -a $ROOTPATH/dest/sr/{.be.env,.fe.env,conf.d} $ROOTPATH/dest/sr/projects/${project_name} && \
+        export envFile="$ROOTPATH/dest/sr/projects/${project_name}/.env"
+
+    setEnvItemMust BE_NUM           ${be_num}                                           $envFile
+    setEnvItemMust FE_USER          "root"                                              $envFile
+    setEnvItemMust FE_PASSWORD      ""                                                  $envFile
+    setEnvItemMust FE_HTTP_PORT     8030                                                $envFile
+    setEnvItemMust FE_QUERY_PORT    9030                                                $envFile
+    setEnvItemMust FE_HOST          ${project_name}_starrocks-fe_1                      $envFile
+    setEnvItemMust OUTPUT_DIR       $ROOTPATH/dest/sr/projects/${project_name}/.output  $envFile
 
     cat <<EOF > $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml
 version: "3.9"
@@ -137,6 +148,8 @@ services:
             - -c
             - |
                 /opt/starrocks/fe_entrypoint.sh ${project_name}_starrocks-fe_1
+        networks:
+            - sr_${project_name}
         ports:
             - "${valid_port}:8030"
             - "$(expr $valid_port + 1):9020"
@@ -160,8 +173,12 @@ services:
                 /opt/starrocks/be_entrypoint.sh ${project_name}_starrocks-fe_1
         ports:
             - "$(expr $valid_port + 3):8040"
+        networks:
+            - sr_${project_name}
         depends_on:
             - starrocks-fe
+        deploy:
+            replicas: ${be_num}
         healthcheck:
             test: ["CMD-SHELL", "netstat -tnlp|grep :8040 || exit 1"]
             interval: 10s
@@ -171,12 +188,12 @@ services:
             - $ROOTPATH/dest/sr/projects/${project_name}/be0_data:/opt/starrocks/be/storage
             - $ROOTPATH/dest/sr/projects/${project_name}/conf.d/be.conf:/opt/starrocks/be/conf/be.conf:ro
 networks:
-    ${project_name}:
+    sr_${project_name}:
         driver: bridge
 EOF
 
-# 使用 Docker Compose 启动 Starrocks 服务
-docker-compose -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml up -d && \
+    # 使用 Docker Compose 启动 Starrocks 服务
+    docker-compose -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml up -d && \
         { echo "Starrocks [${project_name}] installed successfully"; exit 0; }
 }
 
@@ -228,8 +245,8 @@ install_flink_cdc() {
     >>> Selected: " srProject && \
         [ -d $ROOTPATH/dest/sr/project/$srProject ] || { echo "starrocks project $srProject not found";exit 1; }
 
-    # 安装 Flink CDC 的具体步骤
     echo "Installing Flink CDC [${project_name}] ..."
+    # 安装 Flink CDC 的具体步骤
     cat <<EOF > $ROOTPATH/flink/projects/${project_name}/docker-compose.yml
     version: "3.9"
     services:
@@ -243,6 +260,9 @@ install_flink_cdc() {
             volumes:
                 - $ROOTPATH/flink/projects/${project_name}/checkpoint:/opt/flink/checkpoint
                 - $ROOTPATH/flink/projects/${project_name}/savepoint:/opt/flink/savepoint
+            networks:
+                - ${sourceType}_${sourceProject}
+                - sr_${srProject}
             environment:
             - |
                 FLINK_PROPERTIES=
@@ -254,17 +274,46 @@ install_flink_cdc() {
             command: taskmanager
             deploy:
                 replicas: 1
+            networks:
+                - ${sourceType}_${sourceProject}
+                - sr_${srProject}
             environment:
             - |
                 FLINK_PROPERTIES=
                 jobmanager.rpc.address: ${project_name}_jobmanager_1
                 taskmanager.numberOfTaskSlots: 4
 EOF
-    # your installation commands here
-    echo "Flink CDC installed successfully"
+    docker-compose -f $ROOTPATH/flink/projects/${project_name}/docker-compose.yml up -d && \
+        { echo "Flink CDC [$project_name] installed successfully"; exit 0; }
 
     # 配置自动同步 MySQL 的 sample 数据库到 Starrocks
     echo "Configuring automatic synchronization from MySQL to Starrocks..."
+
+    echo "Database patterns: "
+    read DB_PATTERN
+    echo "Table patterns: "
+    read TABLE_PATTERN
+
+    source $ROOTPATH/src/$sourceType/$sourceProject/.env
+    source $ROOTPATH/dest/sr/projects/$srProject/.env
+
+    [ ! -f $ROOTPATH/flink/tools/smt/starrocks-migrate-tool ] && \
+        wget https://cdn-thirdparty.starrocks.com/smt.tar.gz && \
+        tar -xzvf smt.tar.gz -C $ROOTPATH/flink/tools
+
+    SMTCONF=$ROOTPATH/flink/projects/${project_name}/smt.conf
+
+    sh $ROOTPATH/src/$sourceType/$sourceProject/.smt.sh >   $SMTCONF
+    sh $ROOTPATH/dest/sr/$srProject/.smt.sh             >>  $SMTCONF
+    $ROOTPATH/flink/tools/smt/starrocks-migrate-tool -c     $SMTCONF
+
+    docker cp $OUTPUT_DIR ${srProject}_starrocks-fe_1:/tmp
+    docker cp $OUTPUT_DIR ${project_name}_jobmanager_1:/tmp
+    docker exec -ti ${srProject}_starrocks-fe_1 \
+        "mysql -u $FE_USER -h $FE_HOST -P $FE_QUERY_PORT -p$FE_PASSWORD < /tmp/.output/starrocks-create.all.sql"
+    docker exec -ti ${project_name}_jobmanager_1 bash -c " \
+        bin/sql-client.sh < /tmp/.output/flink-create.all.sql && bin/flink list"
+
     # your configuration commands here
     echo "Automatic synchronization configured successfully"
 }
