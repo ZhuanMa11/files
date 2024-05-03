@@ -30,9 +30,7 @@ install_mysql() {
     # 创建项目根目录
     mkdir -p $ROOTPATH/src/mysql/projects/${project_name}/{initsql,conf.d}
     # 拷贝公共初始化内容
-    cp -a $ROOTPATH/src/mysql/initsql/* $ROOTPATH/src/mysql/projects/${project_name}/initsql
-    cp -a $ROOTPATH/src/mysql/conf.d/* $ROOTPATH/src/mysql/projects/${project_name}/conf.d
-    cp -a $ROOTPATH/src/mysql/.env $ROOTPATH/src/mysql/projects/${project_name}/.env && \
+    cp -a $ROOTPATH/src/mysql/{initsql,conf.d,.env} $ROOTPATH/src/mysql/projects/${project_name} && \
         export envFile="$ROOTPATH/src/mysql/projects/${project_name}/.env"
 
     initport=$(cat .port)
@@ -110,8 +108,7 @@ install_starrocks() {
     # 创建一个 docker-compose.yml 文件来定义 Starrocks 服务
     [ -d $ROOTPATH/dest/sr/projects/${project_name} ] && { echo "Starrocks [$project_name] already exists"; exit 1; }
     mkdir -p $ROOTPATH/dest/sr/projects/${project_name}
-    cp -a $ROOTPATH/dest/sr/.be.env $ROOTPATH/dest/sr/projects/${project_name}
-    cp -a $ROOTPATH/dest/sr/.fe.env $ROOTPATH/dest/sr/projects/${project_name}
+    cp -a $ROOTPATH/dest/sr/{.be.env,.fe.env,conf.d} $ROOTPATH/dest/sr/projects/${project_name}
 
     cat <<EOF > $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml
 version: "3.9"
