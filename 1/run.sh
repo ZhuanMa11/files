@@ -53,7 +53,7 @@ services:
         networks:
             - ${project_name}
         volumes:
-            - $ROOTPATH/src/mysql/projects/${project_name}/conf.d:/etc/mysql/conf.d
+            - $ROOTPATH/src/mysql/projects/${project_name}/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf:ro
             - $ROOTPATH/src/mysql/projects/${project_name}/data:/var/lib/mysql
             - $ROOTPATH/src/mysql/projects/${project_name}/initsql:/docker-entrypoint-initdb.d
 networks:
@@ -295,18 +295,24 @@ status_flink_cdc() {
 
 # 主菜单
 echo "Welcome to the DevOps Tool"
+echo "<<< Mysql >>>"
 echo "1. Install MySQL"
 echo "2. Stop MySQL"
 echo "3. List MySQL"
 echo "4. Status MySQL"
+echo ""
+echo "<<< Starrocks >>>"
 echo "5. Install Starrocks"
 echo "6. Stop Starrocks"
 echo "7. List Starrocks"
 echo "8. Status Starrocks"
+echo ""
+echo "<<< Flink CDC >>>"
 echo "9. Install Flink CDC and configure synchronization"
 echo "10. Stop Flink CDC"
 echo "11. List Flink CDC"
 echo "12. Status Flink CDC"
+echo ""
 echo "Enter your choice (1-12): "
 read choice
 
