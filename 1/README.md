@@ -19,11 +19,9 @@
 # Usage: ./run.sh <project_name> <mysql_username> <mysql_password> <mysql_dbname> <mysql_root_password>
 bash ./run.sh demo demo 123456 sample P@ssW0rd
 ```
-1.2 查看mysql项目列表
-
 
 ### 2. Starrocks流程
-2.2 快速部署starrocks环境（多be）
+2.1 快速部署starrocks环境（多be）
 ``` bash
 # @Param project_name 项目名称 [required]
 # @Param be_num 设置be实例数 [optional]
@@ -33,7 +31,7 @@ bash ./run.sh demo 4
 ```
 
 ### 3. Flink CDC流程
-快速部署flink cdc任务
+3.1 快速部署flink cdc任务
 ```bash
 # @Param project_name 项目名称 [required]
 # @Param taskmanager_num taskmanager数量 [optional]
