@@ -262,6 +262,11 @@ install_flink_cdc() {
     # 安装 Flink CDC 的具体步骤
     cat <<EOF > $ROOTPATH/flink/projects/${project_name}/docker-compose.yml
     version: "3.9"
+    networks:
+        ${sourceProject}_${sourceType}:
+            external: true
+        ${srProject}_sr:
+            external: true
     services:
         jobmanager:
             image: flink:1.14.4-scala_2.11
