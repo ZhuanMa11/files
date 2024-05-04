@@ -1,3 +1,4 @@
+source $1
 echo "[db]
 type = mysql
 host = $MYSQL_HOST

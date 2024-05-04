@@ -312,9 +312,6 @@ EOF
     echo "Table patterns: "
     read TABLE_PATTERN
 
-    . $ROOTPATH/src/$sourceType/projects/$sourceProject/.env
-    . $ROOTPATH/dest/sr/projects/$srProject/.env
-
     mkdir -p $ROOTPATH/flink/tools
     [ ! -f $ROOTPATH/flink/tools/smt/starrocks-migrate-tool ] && \
         wget https://cdn-thirdparty.starrocks.com/smt.tar.gz && \
@@ -322,8 +319,8 @@ EOF
 
     SMTCONF=$ROOTPATH/flink/projects/${project_name}/smt.conf
 
-    sh $ROOTPATH/src/$sourceType/.smt.sh            >   $SMTCONF
-    sh $ROOTPATH/dest/sr/.smt.sh                    >>  $SMTCONF
+    sh $ROOTPATH/src/$sourceType/.smt.sh  $ROOTPATH/src/$sourceType/projects/$sourceProject/.env          >   $SMTCONF
+    sh $ROOTPATH/dest/sr/.smt.sh   $ROOTPATH/dest/sr/projects/$srProject/.env                 >>  $SMTCONF
     $ROOTPATH/flink/tools/smt/starrocks-migrate-tool -c $SMTCONF
 
     docker cp $OUTPUT_DIR ${srProject}_starrocks-fe_1:/tmp

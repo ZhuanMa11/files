@@ -1,3 +1,4 @@
+source $1
 echo "[other]
 # number of backends in StarRocks
 be_num = ${BE_NUM}
