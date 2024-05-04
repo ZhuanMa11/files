@@ -167,8 +167,8 @@ services:
             - -c
             - |
                 /opt/starrocks/be_entrypoint.sh ${project_name}_starrocks-fe_1
-        ports:
-            - "$(expr $valid_port + 3):8040"
+        # ports:
+        #     - "$(expr $valid_port + 3):8040"
         networks:
             - sr
         depends_on:
