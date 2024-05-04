@@ -104,14 +104,13 @@ status_mysql() {
 install_starrocks() {
     # 检查用户是否提供了参数
     if [ $# -eq 0 ]; then
-        echo "Usage: $0 <project_name> <starrocks_version> <be_num>"
+        echo "Usage: $0 <project_name> <be_num>"
         exit 1
     fi
 
     # 用户传入的参数
     project_name=$1
-    starrocks_version=${2:-"latest"}
-    be_num=${3:-"1"}
+    be_num=${2:-"1"}
     init_port=$(cat .port)
     offset=$(dirsInPath '*' $ROOTPATH/dest/sr/projects |wc -l)
     valid_port=$(expr $init_port + $[$offset*4])
@@ -139,7 +138,7 @@ networks:
         driver: bridge
 services:
     starrocks-fe:
-        image: starrocks/fe-ubuntu:${starrocks_version}
+        image: starrocks/fe-ubuntu:latest
         container_name: ${project_name}_starrocks-fe_1
         hostname: ${project_name}_starrocks-fe_1
         env_file:
@@ -167,7 +166,7 @@ EOF
     for i in $(seq 1 $be_num);do
         cat << EOA >> $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml
     starrocks-be-${i}:
-        image: starrocks/be-ubuntu:${starrocks_version}
+        image: starrocks/be-ubuntu:latest
         env_file:
             - $ROOTPATH/dest/sr/projects/${project_name}/.be.env
         command:

@@ -9,11 +9,10 @@ bash ./run.sh demo demo 123456 sample P@ssW0rd
 快速部署starrocks环境（多be）
 ``` bash
 # @Param project_name 项目名称 [required]
-# @Param starrocks_version starrocks版本 [optional]
 # @Param be_num 设置be角色数量 [optional]
 
-# Usage: ./run.sh <project_name> <starrocks_version> <be_num>
-bash ./run.sh demo latest 4
+# Usage: ./run.sh <project_name> <be_num>
+bash ./run.sh demo 4
 ```
 
 快速部署flink cdc任务
