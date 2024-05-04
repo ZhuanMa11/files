@@ -318,6 +318,7 @@ EOF
     source $ROOTPATH/src/$sourceType/projects/$sourceProject/.env
     source $ROOTPATH/dest/sr/projects/$srProject/.env
 
+    mkdir -p $ROOTPATH/flink/tools
     [ ! -f $ROOTPATH/flink/tools/smt/starrocks-migrate-tool ] && \
         wget https://cdn-thirdparty.starrocks.com/smt.tar.gz && \
         tar -xzvf smt.tar.gz -C $ROOTPATH/flink/tools
