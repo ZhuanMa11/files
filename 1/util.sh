@@ -31,8 +31,13 @@ function portUsableFromFile(){
     file=$1
     port=$(cat $file)
     while :;do
-        lsof -i:$port &>/dev/null || { echo $port; break; }
+        portUsed $port || { echo $port; break; }
         port=$(expr $port + 1 )
     done
     echo $port > $file
+}
+
+function portUsed(){
+    port=$1
+    lsof -i:$port &>/dev/null || docker ps -a |grep -q ":$port->"
 }
