@@ -15,7 +15,7 @@ function setEnvItemMust() {
     newval=${2:-""}
     file=$3
     
-    grep -q "^$key=" $file 2>/dev/null && sed sed -i "s#$key=.*#$key=$newval#g" $file || 
+    grep -q "^$key=" $file 2>/dev/null && sed -i "s#$key=.*#$key=$newval#g" $file || 
         echo "$key=$newval" >> $file
 }
 

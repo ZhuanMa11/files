@@ -34,7 +34,7 @@ install_mysql() {
     initport=$(cat .port)
     offset=$(dirsInPath '*' $ROOTPATH/src/mysql/projects |wc -l)
     setEnvItemMust MYSQL_DATABASE       $mysql_dbname           $envFile
-    setEnvItemMust MYSQL_HOST           ${project}_mysql_1      $envFile
+    setEnvItemMust MYSQL_HOST           ${project_name}_mysql_1      $envFile
     setEnvItemMust MYSQL_USER           $mysql_username         $envFile
     setEnvItemMust MYSQL_PASSWORD       $mysql_password         $envFile
     setEnvItemMust MYSQL_ROOT_PASSWORD  $mysql_root_password    $envFile
