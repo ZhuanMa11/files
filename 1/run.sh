@@ -134,6 +134,9 @@ install_starrocks() {
 
     cat <<EOF > $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml
 version: "3.9"
+networks:
+    sr:
+        driver: bridge
 services:
     starrocks-fe:
         image: starrocks/fe-ubuntu:${starrocks_version}
@@ -160,7 +163,10 @@ services:
             interval: 30s
             timeout: 30s
             retries: 3
-    starrocks-be:
+EOF
+    for i in $(seq 1 $be_num);do
+        cat << EOA >> $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml
+    starrocks-be-${i}:
         image: starrocks/be-ubuntu:${starrocks_version}
         env_file:
             - $ROOTPATH/dest/sr/projects/${project_name}/.be.env
@@ -169,26 +175,20 @@ services:
             - -c
             - |
                 /opt/starrocks/be_entrypoint.sh ${project_name}_starrocks-fe_1
-        # ports:
-        #     - "$(expr $valid_port + 3):8040"
         networks:
             - sr
         depends_on:
             - starrocks-fe
-        deploy:
-            replicas: ${be_num}
         healthcheck:
             test: ["CMD-SHELL", "netstat -tnlp|grep :8040 || exit 1"]
             interval: 30s
             timeout: 30s
             retries: 3
         volumes:
-            - $ROOTPATH/dest/sr/projects/${project_name}/be0_data:/opt/starrocks/be/storage
+            - $ROOTPATH/dest/sr/projects/${project_name}/be${i}_data:/opt/starrocks/be/storage
             - $ROOTPATH/dest/sr/projects/${project_name}/conf.d/be.conf:/opt/starrocks/be/conf/be.conf:ro
-networks:
-    sr:
-        driver: bridge
-EOF
+EOA
+    done
 
     # 使用 Docker Compose 启动 Starrocks 服务
     docker-compose -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml up -d && \
