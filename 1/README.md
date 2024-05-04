@@ -1,6 +1,9 @@
 **用于解决频繁创建和卸载Mysql/Starrocsk场景，以及满足flink cdc快速部署需求；**
 
 ***实现方式***：通过docker-compose管理，以容器形式提供用户使用，提供flink cdc流程使用；
+***环境依赖***：
+1. Docker
+2. Docker-compose
 
 ***TODO***：
 1. 控制QoS资源配额，合理分配应用资源；
