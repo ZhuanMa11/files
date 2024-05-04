@@ -1,3 +1,4 @@
+#!/bin/bash
 envFile=$1
 cat $envFile |sed  's#^#export #g' > ${envFile}~
 source ${envFile}~
