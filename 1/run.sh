@@ -50,13 +50,13 @@ services:
         ports:
             - "$(expr $initport - $offset):3306"
         networks:
-            - mysql_${project_name}
+            - mysql
         volumes:
             - $ROOTPATH/src/mysql/projects/${project_name}/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf:ro
             - $ROOTPATH/src/mysql/projects/${project_name}/data:/var/lib/mysql
             - $ROOTPATH/src/mysql/projects/${project_name}/initsql:/docker-entrypoint-initdb.d
 networks:
-    mysql_${project_name}:
+    mysql:
         driver: bridge
 EOF
 
@@ -145,7 +145,7 @@ services:
             - |
                 /opt/starrocks/fe_entrypoint.sh ${project_name}_starrocks-fe_1
         networks:
-            - sr_${project_name}
+            - sr
         ports:
             - "${valid_port}:8030"
             - "$(expr $valid_port + 1):9020"
@@ -170,7 +170,7 @@ services:
         ports:
             - "$(expr $valid_port + 3):8040"
         networks:
-            - sr_${project_name}
+            - sr
         depends_on:
             - starrocks-fe
         deploy:
@@ -184,7 +184,7 @@ services:
             - $ROOTPATH/dest/sr/projects/${project_name}/be0_data:/opt/starrocks/be/storage
             - $ROOTPATH/dest/sr/projects/${project_name}/conf.d/be.conf:/opt/starrocks/be/conf/be.conf:ro
 networks:
-    sr_${project_name}:
+    sr:
         driver: bridge
 EOF
 
@@ -272,8 +272,8 @@ install_flink_cdc() {
                 - $ROOTPATH/flink/projects/${project_name}/checkpoint:/opt/flink/checkpoint
                 - $ROOTPATH/flink/projects/${project_name}/savepoint:/opt/flink/savepoint
             networks:
-                - ${sourceType}_${sourceProject}
-                - sr_${srProject}
+                - ${sourceProject}_${sourceType}
+                - ${srProject}_sr
             environment:
             - |
                 FLINK_PROPERTIES=
@@ -286,8 +286,8 @@ install_flink_cdc() {
             deploy:
                 replicas: ${taskmanager_num}
             networks:
-                - ${sourceType}_${sourceProject}
-                - sr_${srProject}
+                - ${sourceProject}_${sourceType}
+                - ${srProject}_sr
             environment:
             - |
                 FLINK_PROPERTIES=
