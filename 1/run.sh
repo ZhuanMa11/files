@@ -31,8 +31,6 @@ install_mysql() {
     cp -a $ROOTPATH/src/mysql/{initsql,conf.d,.env} $ROOTPATH/src/mysql/projects/${project_name} && \
         export envFile="$ROOTPATH/src/mysql/projects/${project_name}/.env"
 
-    initport=$(cat .port)
-    offset=$(dirsInPath '*' $ROOTPATH/src/mysql/projects |wc -l)
     setEnvItemMust MYSQL_DATABASE       $mysql_dbname           $envFile
     setEnvItemMust MYSQL_HOST           ${project_name}_mysql_1      $envFile
     setEnvItemMust MYSQL_USER           $mysql_username         $envFile
@@ -48,7 +46,7 @@ services:
         env_file:
             - $envFile
         ports:
-            - "$(expr $initport - $offset):3306"
+            - "$(portUsableFromFile $ROOTPATH/.port):3306"
         networks:
             - mysql
         volumes:
@@ -59,7 +57,6 @@ networks:
     mysql:
         driver: bridge
 EOF
-
     # 使用 Docker Compose 启动 MySQL 服务
     docker-compose -f $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml up -d && \
     echo "MySQL [${project_name}] installed successfully"
@@ -111,9 +108,6 @@ install_starrocks() {
     # 用户传入的参数
     project_name=$1
     be_num=${2:-"1"}
-    init_port=$(cat .port)
-    offset=$(dirsInPath '*' $ROOTPATH/dest/sr/projects |wc -l)
-    valid_port=$(expr $init_port + $[$offset*4])
 
     [ -d $ROOTPATH/dest/sr/projects/${project_name} ] && { echo "Starrocks [${project_name}] already exists"; exit 1; }
     # 安装 Starrocks 的具体步骤
@@ -151,9 +145,9 @@ services:
         networks:
             - sr
         ports:
-            - "${valid_port}:8030"
-            - "$(expr $valid_port + 1):9020"
-            - "$(expr $valid_port + 2):9030"
+            - "$(portUsableFromFile $ROOTPATH/.port):8030"
+            - "$(portUsableFromFile $ROOTPATH/.port):9020"
+            - "$(portUsableFromFile $ROOTPATH/.port):9030"
         volumes:
             - $ROOTPATH/dest/sr/projects/${project_name}/fe0_data:/opt/starrocks/fe/meta
             - $ROOTPATH/dest/sr/projects/${project_name}/conf.d/fe.conf:/opt/starrocks/fe/conf/fe.conf:ro
@@ -189,6 +183,7 @@ EOF
 EOA
     done
 
+    echo $initport > $ROOTPATH/.port
     # 使用 Docker Compose 启动 Starrocks 服务
     docker-compose -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml up -d && \
         { echo "Starrocks [${project_name}] installed successfully"; exit 0; }
@@ -269,7 +264,7 @@ services:
     jobmanager:
         image: flink:1.14.4-scala_2.11
         ports:
-        - "8081:8081"
+        - "$(portUsableFromFile $ROOTPATH/.port):8081"
         command: jobmanager
         env_file:
             - $ROOTPATH/flink/.env
