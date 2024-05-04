@@ -301,7 +301,7 @@ services:
         environment:
         - |
             FLINK_PROPERTIES=
-            jobmanager.rpc.address: ${project_name}_jobmanager_1
+            jobmanager.rpc.address: jobmanager
             taskmanager.numberOfTaskSlots: ${slot_num}
 EOF
     docker-compose -f $ROOTPATH/flink/projects/${project_name}/docker-compose.yml up -d || \
