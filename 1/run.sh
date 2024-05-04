@@ -182,8 +182,6 @@ EOF
             - $ROOTPATH/dest/sr/projects/${project_name}/conf.d/be.conf:/opt/starrocks/be/conf/be.conf:ro
 EOA
     done
-
-    echo $initport > $ROOTPATH/.port
     # 使用 Docker Compose 启动 Starrocks 服务
     docker-compose -f $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml up -d && \
         { echo "Starrocks [${project_name}] installed successfully"; exit 0; }

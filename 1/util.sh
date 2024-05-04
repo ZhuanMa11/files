@@ -32,8 +32,8 @@ function portUsableFromFile(){
     port=$(cat $file)
     while :;do
         portUsed $port || { \
-            echo $port;     \
-            echo $(expr $port + 1 ) > $file; }
+            echo $port;
+            echo $(expr $port + 1) > $file;break; }
         port=$(expr $port + 1 )
     done
     
