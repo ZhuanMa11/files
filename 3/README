@@ -47,7 +47,7 @@
     使用容器编排工具：
         如 Kubernetes、Docker Swarm 等，可以编写 Deployment 文件或 Docker Compose 文件来定义应用的部署和管理规则，然后通过这些工具进行自动化部署和扩展。
     使用持续集成/持续部署 (CI/CD) 工具：
-        如 Jenkins、GitLab CI/CD、GitHub Actions 、Argo Workflow 等，可以配置自动化流水线来构建 Docker 镜像、测试应用、部署到指定环境，并进行监控和日志记录。
+        如 Jenkins、GitLab CI/CD、Argo Workflow 等，可以配置自动化流水线来构建 Docker 镜像、测试应用、部署到指定环境，并进行监控和日志记录。
     使用自动化脚本：
         编写 Shell 脚本、Python 脚本等来实现自动化部署过程，结合相关工具和命令来完成硬件环境准备、软件安装、应用部署和配置等操作。
     使用基础设施即代码 (IaC) 工具：
