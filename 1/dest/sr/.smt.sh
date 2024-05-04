@@ -1,4 +1,6 @@
-source $1
+envFile=$1
+cat $envFile |sed  's#^#export #g' > ${envFile}~
+source ${envFile}~
 echo "[other]
 # number of backends in StarRocks
 be_num = ${BE_NUM}
