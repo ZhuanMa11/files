@@ -157,8 +157,8 @@ services:
             - $ROOTPATH/dest/sr/projects/${project_name}/conf.d/fe.conf:/opt/starrocks/fe/conf/fe.conf:ro
         healthcheck:
             test: ["CMD-SHELL", "netstat -tnlp|grep :9030 || exit 1"]
-            interval: 10s
-            timeout: 10s
+            interval: 30s
+            timeout: 30s
             retries: 3
     starrocks-be:
         image: starrocks/be-ubuntu:${starrocks_version}
@@ -179,8 +179,8 @@ services:
             replicas: ${be_num}
         healthcheck:
             test: ["CMD-SHELL", "netstat -tnlp|grep :8040 || exit 1"]
-            interval: 10s
-            timeout: 10s
+            interval: 30s
+            timeout: 30s
             retries: 3
         volumes:
             - $ROOTPATH/dest/sr/projects/${project_name}/be0_data:/opt/starrocks/be/storage
