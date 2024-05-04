@@ -312,8 +312,8 @@ EOF
 
     SMTCONF=$ROOTPATH/flink/projects/${project_name}/smt.conf
 
-    sh $ROOTPATH/src/$sourceType/.smt.sh  $ROOTPATH/src/$sourceType/projects/$sourceProject/.env          >   $SMTCONF
-    sh $ROOTPATH/dest/sr/.smt.sh   $ROOTPATH/dest/sr/projects/$srProject/.env                 >>  $SMTCONF
+    bash $ROOTPATH/src/$sourceType/.smt.sh  $ROOTPATH/src/$sourceType/projects/$sourceProject/.env          >   $SMTCONF
+    bash $ROOTPATH/dest/sr/.smt.sh   $ROOTPATH/dest/sr/projects/$srProject/.env                 >>  $SMTCONF
     $ROOTPATH/flink/tools/smt/starrocks-migrate-tool -c $SMTCONF
 
     docker cp $OUTPUT_DIR ${srProject}_starrocks-fe_1:/tmp
