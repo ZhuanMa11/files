@@ -137,6 +137,8 @@ version: "3.9"
 services:
     starrocks-fe:
         image: starrocks/fe-ubuntu:${starrocks_version}
+        container_name: ${project_name}_starrocks-fe_1
+        hostname: ${project_name}_starrocks-fe_1
         env_file:
             - $ROOTPATH/dest/sr/projects/${project_name}/.fe.env
         command:
