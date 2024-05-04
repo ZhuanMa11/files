@@ -34,7 +34,7 @@ function portUsableFromFile(){
         portUsed $port || { echo $port; break; }
         port=$(expr $port + 1 )
     done
-    echo $port > $file
+    echo $(expr $port + 1 ) > $file
 }
 
 function portUsed(){
