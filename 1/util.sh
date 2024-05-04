@@ -30,7 +30,7 @@ function dirsInPath() {
 function portUsableFromFile(){
     file=$1
     port=$(cat $file)
-    while True;do
+    while :;do
         lsof -i:$port &>/dev/null || { echo $port; break; }
         port=$(expr $port + 1 )
     done
