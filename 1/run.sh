@@ -260,49 +260,49 @@ install_flink_cdc() {
     echo "Installing Flink CDC [${project_name}] ..."
     # 安装 Flink CDC 的具体步骤
     cat <<EOF > $ROOTPATH/flink/projects/${project_name}/docker-compose.yml
-    version: "3.9"
-    networks:
-        ${sourceProject}_${sourceType}:
-            external: true
-        ${srProject}_sr:
-            external: true
-        cdc:
-            driver: bridge
-    services:
-        jobmanager:
-            image: flink:1.14.4-scala_2.11
-            ports:
-            - "8081:8081"
-            command: jobmanager
-            env_file:
-                - $ROOTPATH/flink/.env
-            volumes:
-                - $ROOTPATH/flink/projects/${project_name}/checkpoint:/opt/flink/checkpoint
-                - $ROOTPATH/flink/projects/${project_name}/savepoint:/opt/flink/savepoint
-            networks:
-                - ${sourceProject}_${sourceType}
-                - ${srProject}_sr
-               - cdc
-            environment:
-            - |
-                FLINK_PROPERTIES=
-                jobmanager.rpc.address: ${project_name}_jobmanager_1
-        taskmanager:
-            image: flink:1.14.4-scala_2.11
-            depends_on:
-            - jobmanager
-            command: taskmanager
-            deploy:
-                replicas: ${taskmanager_num}
-            networks:
-                - ${sourceProject}_${sourceType}
-                - ${srProject}_sr
-                - cdc
-            environment:
-            - |
-                FLINK_PROPERTIES=
-                jobmanager.rpc.address: ${project_name}_jobmanager_1
-                taskmanager.numberOfTaskSlots: ${slot_num}
+version: "3.9"
+networks:
+    ${sourceProject}_${sourceType}:
+        external: true
+    ${srProject}_sr:
+        external: true
+    cdc:
+        driver: bridge
+services:
+    jobmanager:
+        image: flink:1.14.4-scala_2.11
+        ports:
+        - "8081:8081"
+        command: jobmanager
+        env_file:
+            - $ROOTPATH/flink/.env
+        volumes:
+            - $ROOTPATH/flink/projects/${project_name}/checkpoint:/opt/flink/checkpoint
+            - $ROOTPATH/flink/projects/${project_name}/savepoint:/opt/flink/savepoint
+        networks:
+            - ${sourceProject}_${sourceType}
+            - ${srProject}_sr
+            - cdc
+        environment:
+        - |
+            FLINK_PROPERTIES=
+            jobmanager.rpc.address: ${project_name}_jobmanager_1
+    taskmanager:
+        image: flink:1.14.4-scala_2.11
+        depends_on:
+        - jobmanager
+        command: taskmanager
+        deploy:
+            replicas: ${taskmanager_num}
+        networks:
+            - ${sourceProject}_${sourceType}
+            - ${srProject}_sr
+            - cdc
+        environment:
+        - |
+            FLINK_PROPERTIES=
+            jobmanager.rpc.address: ${project_name}_jobmanager_1
+            taskmanager.numberOfTaskSlots: ${slot_num}
 EOF
     docker-compose -f $ROOTPATH/flink/projects/${project_name}/docker-compose.yml up -d || \
         { echo "Flink CDC [$project_name] failed"; exit 1; }
