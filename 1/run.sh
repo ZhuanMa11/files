@@ -266,6 +266,8 @@ install_flink_cdc() {
             external: true
         ${srProject}_sr:
             external: true
+        cdc:
+            driver: bridge
     services:
         jobmanager:
             image: flink:1.14.4-scala_2.11
@@ -280,6 +282,7 @@ install_flink_cdc() {
             networks:
                 - ${sourceProject}_${sourceType}
                 - ${srProject}_sr
+               - cdc
             environment:
             - |
                 FLINK_PROPERTIES=
@@ -294,6 +297,7 @@ install_flink_cdc() {
             networks:
                 - ${sourceProject}_${sourceType}
                 - ${srProject}_sr
+                - cdc
             environment:
             - |
                 FLINK_PROPERTIES=
