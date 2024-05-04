@@ -315,8 +315,8 @@ EOF
     echo "Table patterns: "
     read TABLE_PATTERN
 
-    source $ROOTPATH/src/$sourceType/projects/$sourceProject/.env
-    source $ROOTPATH/dest/sr/projects/$srProject/.env
+    . $ROOTPATH/src/$sourceType/projects/$sourceProject/.env
+    . $ROOTPATH/dest/sr/projects/$srProject/.env
 
     mkdir -p $ROOTPATH/flink/tools
     [ ! -f $ROOTPATH/flink/tools/smt/starrocks-migrate-tool ] && \
