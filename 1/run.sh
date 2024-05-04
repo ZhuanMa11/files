@@ -241,9 +241,6 @@ install_flink_cdc() {
     taskmanager_num=${2:-"1"}
     slot_num=${3:-"4"}
 
-    [ -d $ROOTPATH/flink/projects/${project_name} ] && \
-        { echo "Flink CDC [${project_name}] already exists"; exit 1; }
-
     mkdir -p $ROOTPATH/flink/projects//${project_name}
     read -p "Datasource type to submit, choose one: [$(dirsInPath '*' $ROOTPATH/src|xargs |tr ' ' '|')]: " sourceType && \
         [ -d $ROOTPATH/src/$sourceType ] || { echo "source type $sourceType not found";exit 1; }
