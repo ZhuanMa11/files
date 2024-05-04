@@ -300,9 +300,9 @@ install_flink_cdc() {
                 jobmanager.rpc.address: ${project_name}_jobmanager_1
                 taskmanager.numberOfTaskSlots: ${slot_num}
 EOF
-    docker-compose -f $ROOTPATH/flink/projects/${project_name}/docker-compose.yml up -d && \
-        { echo "Flink CDC [$project_name] installed successfully"; exit 0; }
-
+    docker-compose -f $ROOTPATH/flink/projects/${project_name}/docker-compose.yml up -d || \
+        { echo "Flink CDC [$project_name] failed"; exit 1; }
+    echo "Flink CDC [$project_name] installed successfully"
     # 配置自动同步 MySQL 的 sample 数据库到 Starrocks
     echo "Configuring automatic synchronization from MySQL to Starrocks..."
 
