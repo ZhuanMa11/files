@@ -286,7 +286,7 @@ services:
         environment:
         - |
             FLINK_PROPERTIES=
-            jobmanager.rpc.address: ${project_name}_jobmanager_1
+            jobmanager.rpc.address: jobmanager
     taskmanager:
         image: flink:1.14.4-scala_2.11
         depends_on:
