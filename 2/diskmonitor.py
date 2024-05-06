@@ -1,5 +1,5 @@
 import time
-from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 
 class FileChangeHandler(FileSystemEventHandler):
@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     # 创建监控器
     event_handler = FileChangeHandler()
-    observer = Observer()
+    observer = PollingObserver()
     observer.schedule(event_handler, monitored_dir, recursive=True)
     observer.start()
 
