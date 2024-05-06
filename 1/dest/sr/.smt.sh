@@ -5,7 +5,7 @@ source ${envFile}~
 echo "[other]
 # number of backends in StarRocks
 be_num = ${BE_NUM}
-# `decimal_v3` is supported since StarRocks-1.18.1
+# \`decimal_v3\` is supported since StarRocks-1.18.1
 use_decimal_v3 = false
 # file to save the converted DDL SQL
 output_dir = ${OUTPUT_DIR}
@@ -19,9 +19,9 @@ schema = ^.*$
 
 ############################################
 ### flink sink configurations
-### DO NOT set `connector`, `table-name`, `database-name`, they are auto-generated
+### DO NOT set \`connector\`, \`table-name\`, \`database-name\`, they are auto-generated
 ############################################
-flink.starrocks.jdbc-url=jdbc:mysql://${FE_HOST}:${FE_QUERY_PORT}>
+flink.starrocks.jdbc-url=jdbc:mysql://${FE_HOST}:${FE_QUERY_PORT}
 flink.starrocks.load-url= ${FE_HOST}:${FE_HTTP_PORT}
 flink.starrocks.username=${FE_USER}
 flink.starrocks.password=${FE_PASSWORD}

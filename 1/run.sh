@@ -37,6 +37,8 @@ install_mysql() {
     setEnvItemMust MYSQL_PASSWORD       $mysql_password         $envFile
     setEnvItemMust MYSQL_ROOT_PASSWORD  $mysql_root_password    $envFile
 
+    sed 's#^#export #g' $envFile > ${envFile}~
+
     cat << EOF > $ROOTPATH/src/mysql/projects/${project_name}/docker-compose.yml
 version: '3.9'
 services:
@@ -53,6 +55,7 @@ services:
             - $ROOTPATH/src/mysql/projects/${project_name}/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf:ro
             - $ROOTPATH/src/mysql/projects/${project_name}/data:/var/lib/mysql
             - $ROOTPATH/src/mysql/projects/${project_name}/initsql:/docker-entrypoint-initdb.d
+            - ${envFile}~:/opt/mysql/.env
 networks:
     mysql:
         driver: bridge
@@ -114,7 +117,7 @@ install_starrocks() {
     echo "Installing Starrocks [${project_name}] ..."
     # 创建一个 docker-compose.yml 文件来定义 Starrocks 服务
     mkdir -p $ROOTPATH/dest/sr/projects/${project_name}
-    cp -a $ROOTPATH/dest/sr/{.be.env,.fe.env,conf.d} $ROOTPATH/dest/sr/projects/${project_name} && \
+    cp -a $ROOTPATH/dest/sr/{.be.env,.fe.env,conf.d,.env} $ROOTPATH/dest/sr/projects/${project_name} && \
         export envFile="$ROOTPATH/dest/sr/projects/${project_name}/.env"
 
     setEnvItemMust BE_NUM           ${be_num}                                           $envFile
@@ -123,7 +126,9 @@ install_starrocks() {
     setEnvItemMust FE_HTTP_PORT     8030                                                $envFile
     setEnvItemMust FE_QUERY_PORT    9030                                                $envFile
     setEnvItemMust FE_HOST          ${project_name}_starrocks-fe_1                      $envFile
-    setEnvItemMust OUTPUT_DIR       $ROOTPATH/dest/sr/projects/${project_name}/.output  $envFile
+    setEnvItemMust OUTPUT_DIR       ./.output     					$envFile
+
+    sed 's#^#export #g' $envFile > ${envFile}~
 
     cat <<EOF > $ROOTPATH/dest/sr/projects/${project_name}/docker-compose.yml
 version: "3.9"
@@ -137,6 +142,7 @@ services:
         hostname: ${project_name}_starrocks-fe_1
         env_file:
             - $ROOTPATH/dest/sr/projects/${project_name}/.fe.env
+            - $envFile
         command:
             - /bin/bash
             - -c
@@ -151,6 +157,7 @@ services:
         volumes:
             - $ROOTPATH/dest/sr/projects/${project_name}/fe0_data:/opt/starrocks/fe/meta
             - $ROOTPATH/dest/sr/projects/${project_name}/conf.d/fe.conf:/opt/starrocks/fe/conf/fe.conf:ro
+            - ${envFile}~:/opt/starrocks/.env
         healthcheck:
             test: ["CMD-SHELL", "netstat -tnlp|grep :9030 || exit 1"]
             interval: 30s
@@ -163,6 +170,7 @@ EOF
         image: starrocks/be-ubuntu:latest
         env_file:
             - $ROOTPATH/dest/sr/projects/${project_name}/.be.env
+            - $envFile
         command:
             - /bin/bash
             - -c
@@ -180,6 +188,7 @@ EOF
         volumes:
             - $ROOTPATH/dest/sr/projects/${project_name}/be${i}_data:/opt/starrocks/be/storage
             - $ROOTPATH/dest/sr/projects/${project_name}/conf.d/be.conf:/opt/starrocks/be/conf/be.conf:ro
+            - ${envFile}~:/opt/starrocks/.env
 EOA
     done
     # 使用 Docker Compose 启动 Starrocks 服务
@@ -248,6 +257,11 @@ install_flink_cdc() {
         [ -d $ROOTPATH/dest/sr/projects/$srProject ] || { echo "starrocks project $srProject not found";exit 1; }
 
     echo "Installing Flink CDC [${project_name}] ..."
+    cp -a $ROOTPATH/flink/.env $ROOTPATH/flink/projects/${project_name} && \
+        export envFile="$ROOTPATH/flink/projects/${project_name}/.env"
+
+    sed 's#^#export #g' $envFile > ${envFile}~
+
     # 安装 Flink CDC 的具体步骤
     cat <<EOF > $ROOTPATH/flink/projects/${project_name}/docker-compose.yml
 version: "3.9"
@@ -262,13 +276,15 @@ services:
     jobmanager:
         image: flink:1.14.4-scala_2.11
         ports:
-        - "$(portUsableFromFile $ROOTPATH/.port):8081"
+            - "$(portUsableFromFile $ROOTPATH/.port):8081"
         command: jobmanager
         env_file:
-            - $ROOTPATH/flink/.env
+            - $envFile
         volumes:
             - $ROOTPATH/flink/projects/${project_name}/checkpoint:/opt/flink/checkpoint
             - $ROOTPATH/flink/projects/${project_name}/savepoint:/opt/flink/savepoint
+            - $ROOTPATH/smt:/opt/smt
+            - ${envFile}~:/opt/flink/.env
         networks:
             - ${sourceProject}_${sourceType}
             - ${srProject}_sr
@@ -280,8 +296,10 @@ services:
     taskmanager:
         image: flink:1.14.4-scala_2.11
         depends_on:
-        - jobmanager
+            - jobmanager
         command: taskmanager
+        volumes:
+            - $ROOTPATH/flink/projects/${project_name}/.env:/opt/flink/.env
         deploy:
             replicas: ${taskmanager_num}
         networks:
@@ -302,24 +320,30 @@ EOF
 
     echo "Database patterns: "
     read DB_PATTERN
+    export DB_PATTERN=$DB_PATTERN
     echo "Table patterns: "
     read TABLE_PATTERN
+    export TABLE_PATTERN=$TABLE_PATTERN
 
-    mkdir -p $ROOTPATH/flink/tools
-    [ ! -f $ROOTPATH/flink/tools/smt/starrocks-migrate-tool ] && \
+    smtPath=$ROOTPATH/smt/projects/${project_name}/${sourceProject}2${srProject}
+    mkdir -p $smtPath
+    [ ! -f $ROOTPATH/smt/starrocks-migrate-tool ] && \
         wget https://cdn-thirdparty.starrocks.com/smt.tar.gz && \
-        tar -xzvf smt.tar.gz -C $ROOTPATH/flink/tools
+        tar -xzvf smt.tar.gz -C $ROOTPATH
 
-    SMTCONF=$ROOTPATH/flink/projects/${project_name}/smt.conf
+    SMTCONF=$smtPath/smt.conf
 
     bash $ROOTPATH/src/$sourceType/.smt.sh  $ROOTPATH/src/$sourceType/projects/$sourceProject/.env          >   $SMTCONF
     bash $ROOTPATH/dest/sr/.smt.sh   $ROOTPATH/dest/sr/projects/$srProject/.env                 >>  $SMTCONF
-    $ROOTPATH/flink/tools/smt/starrocks-migrate-tool -c $SMTCONF
 
-    docker cp $OUTPUT_DIR ${srProject}_starrocks-fe_1:/tmp
-    docker cp $OUTPUT_DIR ${project_name}_jobmanager_1:/tmp
-    docker exec -ti ${srProject}_starrocks-fe_1 \
-        "mysql -u $FE_USER -h $FE_HOST -P $FE_QUERY_PORT -p$FE_PASSWORD < /tmp/.output/starrocks-create.all.sql"
+    source $ROOTPATH/dest/sr/projects/$srProject/.env
+    docker exec -ti ${project_name}_jobmanager_1 bash -c " \
+        /opt/smt/starrocks-migrate-tool -c /opt/smt/projects/${project_name}/${sourceProject}2${srProject}/smt.conf && \
+	mv /opt/smt/tmp/.output /opt/smt/projects/${project_name}/${sourceProject}2${srProject}/"
+    docker cp $smtPath/.output ${srProject}_starrocks-fe_1:/tmp
+    docker cp $smtPath/.output ${project_name}_jobmanager_1:/tmp
+    docker exec -ti ${srProject}_starrocks-fe_1 bash -c " \
+        source /opt/starrocks/.env && mysql -u $FE_USER -h $FE_HOST -P $FE_QUERY_PORT < /tmp/.output/starrocks-create.all.sql"
     docker exec -ti ${project_name}_jobmanager_1 bash -c " \
         bin/sql-client.sh < /tmp/.output/flink-create.all.sql && bin/flink list"
 

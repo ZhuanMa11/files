@@ -5,6 +5,6 @@ source ${envFile}~
 echo "[db]
 type = mysql
 host = $MYSQL_HOST
-port = $MYSQL_PORT
-user = $MYSQL_USER
-password = $MYSQL_PASSWORD"
+port = ${MYSQL_PORT:-3306}
+user = ${MYSQL_USER:-root}
+password = ${MYSQL_PASSWORD:-$MYSQL_ROOT_PASSWORD}"
